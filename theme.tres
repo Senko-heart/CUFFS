@@ -1,0 +1,32 @@
+[gd_resource type="Theme" load_steps=7 format=3 uid="uid://budedpxoymxop"]
+
+[ext_resource type="FontFile" uid="uid://c6lcsrycteuu" path="res://msgothic.ttc" id="1_e1x85"]
+
+[sub_resource type="FontVariation" id="FontVariation_cjfk0"]
+base_font = ExtResource("1_e1x85")
+variation_embolden = 0.4
+
+[sub_resource type="FontVariation" id="FontVariation_e1x85"]
+base_font = ExtResource("1_e1x85")
+variation_embolden = 0.4
+variation_transform = Transform2D(1, 0.2, 0, 1, 0, 0)
+
+[sub_resource type="FontVariation" id="FontVariation_110ce"]
+base_font = ExtResource("1_e1x85")
+variation_transform = Transform2D(1, 0.2, 0, 1, 0, 0)
+
+[sub_resource type="FontVariation" id="FontVariation_05tig"]
+base_font = ExtResource("1_e1x85")
+
+[sub_resource type="FontVariation" id="FontVariation_vj6dk"]
+base_font = ExtResource("1_e1x85")
+
+[resource]
+RichTextLabel/constants/shadow_offset_x = 0
+RichTextLabel/constants/shadow_offset_y = 0
+RichTextLabel/constants/shadow_outline_size = 0
+RichTextLabel/fonts/bold_font = SubResource("FontVariation_cjfk0")
+RichTextLabel/fonts/bold_italics_font = SubResource("FontVariation_e1x85")
+RichTextLabel/fonts/italics_font = SubResource("FontVariation_110ce")
+RichTextLabel/fonts/mono_font = SubResource("FontVariation_05tig")
+RichTextLabel/fonts/normal_font = SubResource("FontVariation_vj6dk")

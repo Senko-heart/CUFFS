@@ -1,0 +1,11 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Project specific ignores
+save/
+system/
+*.zip
+*.ogv
+*.bak
+wav2qoa/*.wav

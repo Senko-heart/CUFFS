@@ -27,6 +27,8 @@ func _init(arc: StringName) -> void:
 
 func _try_load(src: String, case_sensitive: bool = false) -> PackedByteArray:
 	var patch_src := _arc_name.path_join(src)
+	if FS.decensor.file_exists(patch_src, case_sensitive):
+		return FS.decensor.read_file(patch_src, case_sensitive)
 	if FS.patch.file_exists(patch_src, case_sensitive):
 		return FS.patch.read_file(patch_src, case_sensitive)
 	if _arc.file_exists(src, case_sensitive):

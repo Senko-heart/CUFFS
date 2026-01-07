@@ -7,5 +7,8 @@ save/
 system/
 *.zip
 *.ogv
+*.ogv.uid
 *.bak
 wav2qoa/*.wav
+*.exe
+*.pck

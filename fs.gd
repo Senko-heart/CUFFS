@@ -5,6 +5,7 @@ var data2 := ZR.new()
 var voice := ZR.new()
 var sound := ZR.new()
 var patch := ZR.new()
+var decensor := ZR.new()
 
 var frame := ZR.new()
 var option := ZR.new()
@@ -34,6 +35,7 @@ func _open_archives() -> void:
 	voice.open(root.path_join("voice.zip"))
 	sound.open(root.path_join("sound.zip"))
 	patch.open(root.path_join("patch.zip"))
+	decensor.open(root.path_join("decensor.zip"))
 	
 	var system := root.path_join("system")
 	frame.open(system.path_join("frame.zip"))
@@ -161,7 +163,7 @@ func load_image(
 	case_sensitive: bool = false
 ) -> Image:
 	var bytes := _try_load_first(
-		[patch, data1, data2],
+		[decensor, patch, data1, data2],
 		filename + ".png",
 		case_sensitive
 	)
@@ -187,7 +189,7 @@ func load_texture(
 	case_sensitive: bool = false
 ) -> Texture2D:
 	var bytes := _try_load_first(
-		[patch, data1, data2],
+		[decensor, patch, data1, data2],
 		filename + ".png",
 		case_sensitive
 	)

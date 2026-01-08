@@ -191,8 +191,9 @@ func load_texture(
 	filename: String,
 	case_sensitive: bool = false
 ) -> Texture2D:
-	if filename in texture_cache:
-		return texture_cache[filename]
+	var key := filename if case_sensitive else filename.to_upper()
+	if key in texture_cache:
+		return texture_cache[key]
 	var bytes := _try_load_first(
 		[decensor, patch, data1, data2],
 		filename + ".png",
@@ -246,6 +247,7 @@ func cache_load_texture(
 	filename: String,
 	case_sensitive: bool = false
 ) -> void:
-	if not filename in texture_cache:
-		var texture := load_texture(filename, case_sensitive)
-		texture_cache[filename] = texture
+	var key := filename if case_sensitive else filename.to_upper()
+	if not key in texture_cache:
+		var texture := load_texture(key, case_sensitive)
+		texture_cache[key] = texture

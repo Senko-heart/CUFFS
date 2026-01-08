@@ -108,9 +108,11 @@ func _notification(what: int) -> void:
 		await ask_game_exit()
 
 func wait(action: StringName, time: float) -> bool:
+	if Input.is_action_just_pressed(action):
+		await get_tree().process_frame
 	var deadline := get_tree().create_timer(time)
 	while deadline.time_left > 0.0:
-		if Input.is_action_pressed(action):
+		if Input.is_action_just_pressed(action):
 			return true
 		await get_tree().process_frame
 	return false

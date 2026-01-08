@@ -37,6 +37,7 @@ func _apply_texture(tex: Texture2D) -> void:
 
 func _draw() -> void:
 	var _pressed := button_pressed and (not noninteractive or toggle_mode)
+	var _hovered := is_hovered() and not noninteractive
 	var _disabled := disabled_copy if noninteractive else disabled
 	if _disabled:
 		if _pressed and tex_push_disabled:
@@ -46,7 +47,7 @@ func _draw() -> void:
 			_apply_texture(tex_disabled)
 			return
 	elif _pressed:
-		if is_hovered() and tex_pushed_focus:
+		if _hovered and tex_pushed_focus:
 			_apply_texture(tex_pushed_focus)
 			return
 		if tex_pushed:
@@ -55,35 +56,8 @@ func _draw() -> void:
 		if tex_focus:
 			_apply_texture(tex_focus)
 			return
-	elif is_hovered() and tex_focus:
+	elif _hovered and tex_focus:
 		_apply_texture(tex_focus)
 		return
 	if tex_normal:
 		_apply_texture(tex_normal)
-	#match get_draw_mode():
-		#DRAW_DISABLED when button_pressed and tex_push_disabled:
-			#_apply_texture(tex_push_disabled)
-		#DRAW_DISABLED when tex_disabled:
-			#_apply_texture(tex_disabled)
-		#DRAW_DISABLED when tex_normal:
-			#_apply_texture(tex_normal)
-		#DRAW_HOVER_PRESSED when tex_pushed_focus:
-			#_apply_texture(tex_pushed_focus)
-		#DRAW_HOVER_PRESSED when tex_pushed:
-			#_apply_texture(tex_pushed)
-		#DRAW_HOVER_PRESSED when tex_focus:
-			#_apply_texture(tex_focus)
-		#DRAW_PRESSED when is_hovered() and tex_pushed_focus:
-			#_apply_texture(tex_pushed_focus)
-		#DRAW_PRESSED when tex_pushed:
-			#_apply_texture(tex_pushed)
-		#DRAW_HOVER when tex_focus:
-			#_apply_texture(tex_focus)
-		#_ when is_hovered() and button_group and button_pressed and tex_pushed_focus:
-			#_apply_texture(tex_pushed_focus)
-		#_ when is_hovered() and button_group and button_pressed and tex_pushed:
-			#_apply_texture(tex_pushed)
-		#_ when is_hovered() and tex_focus:
-			#_apply_texture(tex_focus)
-		#_ when tex_normal:
-			#_apply_texture(tex_normal)

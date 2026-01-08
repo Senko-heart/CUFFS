@@ -16,6 +16,9 @@ var root := "."
 var save_dir: String
 var _arcs_loaded := false
 
+var cache_hint := ""
+var texture_cache: Dictionary[String, Texture2D] = {}
+
 func _init() -> void:
 	match OS.get_name():
 		"Android":
@@ -188,6 +191,8 @@ func load_texture(
 	filename: String,
 	case_sensitive: bool = false
 ) -> Texture2D:
+	if filename in texture_cache:
+		return texture_cache[filename]
 	var bytes := _try_load_first(
 		[decensor, patch, data1, data2],
 		filename + ".png",
@@ -229,3 +234,18 @@ func open_save_file(path: String) -> FileAccess:
 	dir.make_dir_recursive(path.get_base_dir())
 	path = save_dir.path_join(path)
 	return FileAccess.open(path, FileAccess.WRITE)
+
+func cache_reset(hint: String) -> bool:
+	if cache_hint != hint:
+		texture_cache.clear()
+		cache_hint = hint
+		return true
+	return false
+
+func cache_load_texture(
+	filename: String,
+	case_sensitive: bool = false
+) -> void:
+	if not filename in texture_cache:
+		var texture := load_texture(filename, case_sensitive)
+		texture_cache[filename] = texture

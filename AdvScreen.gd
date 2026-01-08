@@ -484,16 +484,20 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 				auto_timer = get_tree().create_timer(auto_time)
 		elif cid == "ID_QLOAD" \
 		or Input.is_action_just_pressed("quick_load"):
-			if not Global.is_recollect_mode() \
-			and Global.sc_obj_qsave \
-			and await Global.confirm(Global.confirm_prompt.qload):
-				await Global.quick_load()
-				ret = GameLogic.Load
-				break
+			if not Global.is_recollect_mode() and Global.sc_obj_qsave:
+				msg_frame.enable(false)
+				if await Global.confirm(Global.confirm_prompt.qload):
+					await Global.quick_load()
+					msg_frame.enable(true)
+					ret = GameLogic.Load
+					break
+				msg_frame.enable(true)
 		elif cid == "ID_QSAVE" \
 		or Input.is_action_just_pressed("quick_save"):
 			if not Global.is_recollect_mode():
+				msg_frame.enable(false)
 				await Global.quick_save()
+				msg_frame.enable(true)
 				msg_frame.enable_qload(true)
 		elif cid == "ID_CONFIG" \
 		or Input.is_action_just_pressed("config"):
@@ -638,16 +642,20 @@ func start_select() -> GameLogic:
 				msg_frame.hide_blink()
 		elif cid == "ID_QLOAD" \
 		or Input.is_action_just_pressed("quick_load"):
-			if not Global.is_recollect_mode() \
-			and Global.sc_obj_qsave \
-			and await Global.confirm(Global.confirm_prompt.qload):
-				await Global.quick_load()
-				ret = GameLogic.Load
-				break
+			if not Global.is_recollect_mode() and Global.sc_obj_qsave:
+				msg_frame.enable(false)
+				if await Global.confirm(Global.confirm_prompt.qload):
+					await Global.quick_load()
+					msg_frame.enable(true)
+					ret = GameLogic.Load
+					break
+				msg_frame.enable(true)
 		elif cid == "ID_QSAVE" \
 		or Input.is_action_just_pressed("quick_save"):
 			if not Global.is_recollect_mode():
+				msg_frame.enable(false)
 				await Global.quick_save()
+				msg_frame.enable(true)
 				msg_frame.enable_qload(true)
 		elif cid == "ID_CONFIG" \
 		or Input.is_action_just_pressed("config"):

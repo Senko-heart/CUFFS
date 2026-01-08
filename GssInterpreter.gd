@@ -71,7 +71,29 @@ func load_scenario(sc: String, case_sensitive: bool = false) -> bool:
 	open_regions = { "RecollectMode": false }
 	dead_depth = 0
 	skip_branch = false
+	preload_assets(sc)
 	return true
+
+func preload_assets(sc: String) -> void:
+	if not FS.cache_reset(sc):
+		return
+	for ln in scenario:
+		l = ln
+		li = 0
+		var cmd: Variant = eat_command()
+		if cmd is StepResult:
+			continue
+		var fn: String = cmd.fn
+		var args: Array[Variant] = cmd.args
+		var filename := ""
+		if fn == &"SetCg" or fn == &"SetBustup":
+			var arg: Variant = args.get(0)
+			if arg is String:
+				filename = arg
+		if filename != &"":
+			FS.cache_load_texture(filename)
+	l = ""
+	li = 0
 
 var l := ""
 var li := 0

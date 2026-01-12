@@ -1,6 +1,6 @@
 extends Node
 
-var queue: Array[Dictionary] = []
+var queue: Dictionary[Node, Dictionary] = {}
 var active: Dictionary[Node, Dictionary] = {}
 
 func _init() -> void:
@@ -55,20 +55,25 @@ func _process(delta: float) -> void:
 		active.erase(node)
 
 func schedule(target: Node, anim: Dictionary) -> void:
-	var q := anim.duplicate()
-	q.target = target
-	queue.append(q)
+	queue.get_or_add(target, {}).merge(anim, true)
 
-func run(time: float) -> void:
-	var _queue := queue
-	queue = []
-	for q in _queue:
-		run_single(q, time)
-	for q in _queue:
-		await safe_finish(q.target)
+func run(time: float, select: Array[Node] = []) -> void:
+	if select.is_empty():
+		for target in queue:
+			var q := queue[target]
+			select.append(target)
+			run_single(target, q, time)
+		queue.clear()
+	else:
+		for target in select:
+			if target in queue:
+				var q := queue[target]
+				queue.erase(target)
+				run_single(target, q, time)
+	for target in select:
+		await safe_finish(target)
 
-func run_single(q: Dictionary, time: float) -> void:
-	var node: Node = q.target
+func run_single(node: Node, q: Dictionary, time: float) -> void:
 	var anim := {duration = time, elapsed = 0.0}
 	for prop: StringName in [&"position", &"scale"]:
 		if not prop in q: continue
@@ -157,22 +162,55 @@ func kill(target: Node) -> void:
 
 func destroy(target: Node) -> void:
 	kill(target)
+	queue.erase(target)
 	target.queue_free()
 
+func _move(pos: Vector2, accel: Vector2 = Vector2(3.0, 0.0)) -> Dictionary:
+	return { position = { target = pos, accel = accel }}
+
+func schedule_move(target: Node, pos: Vector2) -> void:
+	schedule(target, _move(pos))
+
 func move(target: Node, pos: Vector2, time: float) -> void:
-	await run_single({target=target,position={target=pos,accel=Vector2(3.0,0.0)}}, time)
+	await run_single(target, _move(pos), time)
+
+func _scale(
+	to: Vector2,
+	from: Vector2,
+	accel: Vector2 = Vector2(3.0, 0.0)
+) -> Dictionary:
+	return { scale = {
+		target = to,
+		base = from,
+		accel = accel,
+	}}
+
+func schedule_scale(target: Node, from: Vector2, to: Vector2) -> void:
+	schedule(target, _scale(to, from))
+
+func schedule_linear_scale(target: Node, from: Vector2, to: Vector2) -> void:
+	schedule(target, _scale(to, from, Vector2.ZERO))
+
+func scale(target: Node, from: Vector2, to: Vector2, time: float) -> void:
+	await run_single(target, _scale(from, to), time)
+
+func _fade(alpha: float) -> Dictionary:
+	return { alpha = { target = alpha }}
 
 func schedule_fade(target: Node, alpha: float) -> void:
-	schedule(target, {alpha={target=alpha}})
+	schedule(target, _fade(alpha))
 
 func fade(target: Node, alpha: float, time: float) -> void:
-	await run_single({target=target,alpha={target=alpha}}, time)
+	await run_single(target, _fade(alpha), time)
+
+func _fade_vol(volume: float) -> Dictionary:
+	return { volume = { target = volume }}
 
 func schedule_fade_vol(target: Node, volume: float) -> void:
-	schedule(target, {volume={target=volume}})
+	schedule(target, _fade_vol(volume))
 
 func fade_vol(target: Node, volume: float, time: float) -> void:
-	await run_single({target=target,volume={target=volume}}, time)
+	await run_single(target, _fade_vol(volume), time)
 
 func property(target: Node, path: String, time: float) -> void:
-	await run_single({target=target,property=path}, time)
+	await run_single(target, { property = path }, time)

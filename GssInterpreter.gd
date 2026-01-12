@@ -287,6 +287,8 @@ func step() -> StepResult:
 		Global.on_game_clear()
 	elif fn == &"EyeCatchEnter":
 		await Global.eye_catch_enter.callv(reshape(args, "", 0))
+	elif fn == &"StaffRoll":
+		await Global.staff_roll.callv(reshape(args, 0))
 	else:
 		return StepResult.BadCommand
 	return enough()

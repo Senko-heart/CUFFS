@@ -65,13 +65,8 @@ func destroy() -> void:
 
 func _show() -> void:
 	if Global.cnf_obj.screen_effect == ScreenEffect.Normal:
-		Anim.schedule(self, {
-			scale = {
-				target = Vector2.ONE,
-				base = Vector2(1.0, 0.95),
-				accel = Vector2(3.0, 0.0) },
-			alpha = { target = 1.0 }
-		})
+		Anim.schedule_scale(self, Vector2(1.0, 0.95), Vector2.ONE)
+		Anim.schedule_fade(self, 1.0)
 		await Anim.run(0.3)
 	else:
 		Anim.kill(self)

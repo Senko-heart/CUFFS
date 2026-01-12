@@ -145,13 +145,8 @@ func apply() -> void:
 
 func _show() -> void:
 	if Global.cnf_obj.screen_effect == ScreenEffect.Normal:
-		Anim.schedule(spr_base, {
-			scale = {
-				target = Vector2.ONE,
-				base = Vector2(0.95, 0.95),
-				accel = Vector2(3.0, 0.0) },
-			alpha = { target = 1.0 }
-		})
+		Anim.schedule_scale(spr_base, Vector2(0.95, 0.95), Vector2.ONE)
+		Anim.schedule_fade(spr_base, 1.0)
 		await Anim.run(0.3)
 	else:
 		Anim.kill(spr_base)
@@ -244,13 +239,8 @@ func voice_details() -> void:
 		var has_voice := bool((Global.cnf_obj.voice_details >> i) & 1)
 		voices[i].button_pressed = has_voice
 	if Global.cnf_obj.screen_effect == ScreenEffect.Normal:
-		Anim.schedule(spr_details, {
-			scale = {
-				target = Vector2.ONE,
-				base = Vector2(1.0, 0.95),
-				accel = Vector2(3.0, 0.0) },
-			alpha = { target = 1.0 }
-		})
+		Anim.schedule_scale(spr_details, Vector2(1.0, 0.95), Vector2.ONE)
+		Anim.schedule_fade(spr_details, 1.0)
 		Anim.schedule_fade(spr_base, 0.5)
 		Anim.run(0.3)
 	else:

@@ -615,8 +615,8 @@ func logo() -> void:
 		Anim.fade(spr_logo, 1.0, 1.0)
 		cancel = await hit_wait(5.0)
 	if not cancel:
-		Anim.schedule(spr_base, { alpha = { target = 0.0 }})
-		Anim.schedule(spr_logo, { alpha = { target = 0.0 }})
+		Anim.schedule_fade(spr_base, 0.0)
+		Anim.schedule_fade(spr_logo, 0.0)
 		await Anim.run(1.0)
 	if spr_logo: Anim.destroy(spr_logo)
 	Anim.destroy(spr_base)
@@ -935,14 +935,9 @@ func confirm(msg: String, yes_no: bool = true, time: float = 0.0) -> bool:
 	get_tree().paused = true
 	
 	if cnf_obj.screen_effect == ScreenEffect.Normal:
-		Anim.schedule(spr_frame, {
-			scale = {
-				base = Vector2(1.0, 0.0),
-				target = Vector2.ONE,
-				accel = Vector2(3.0, 0.0)},
-			alpha = { target = 1.0 }
-		})
-		Anim.schedule(spr_black, { alpha = { target = 0.5 }})
+		Anim.schedule_scale(spr_frame, Vector2(1.0, 0.0), Vector2.ONE)
+		Anim.schedule_fade(spr_frame, 1.0)
+		Anim.schedule_fade(spr_black, 0.5)
 		Anim.run(0.3)
 	else:
 		spr_frame.modulate.a = 1.0
@@ -967,8 +962,8 @@ func confirm(msg: String, yes_no: bool = true, time: float = 0.0) -> bool:
 			time = 1.0
 		await hit_wait(time)
 	if cnf_obj.screen_effect == ScreenEffect.Normal:
-		Anim.schedule(spr_frame, { alpha = { target = 0.0 }})
-		Anim.schedule(spr_black, { alpha = { target = 0.0 }})
+		Anim.schedule_fade(spr_frame, 0.0)
+		Anim.schedule_fade(spr_black, 0.0)
 		await Anim.run(0.3)
 	Anim.destroy(spr_frame)
 	Anim.destroy(spr_black)
@@ -1561,4 +1556,13 @@ func check_play_voice(true_name: String) -> bool:
 	if not true_name.is_empty():
 		return cnf_id & 1 != 0
 	return true
+#endregion
+
+#region file-14.cos
+func staff_roll(type: int) -> void:
+	if is_load():
+		return
+	SoundSystem.stop_bgm()
+	var view := StaffRollView.new(self)
+	await view.run(type)
 #endregion

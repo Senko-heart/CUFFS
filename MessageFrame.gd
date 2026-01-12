@@ -132,13 +132,8 @@ func _show(flush: bool = false) -> void:
 	if _skip_animation(flush):
 		modulate.a = 1.0
 	else:
-		Anim.schedule(self, {
-			scale = {
-				base = Vector2(0.95, 0.95),
-				target = Vector2.ONE,
-				accel = Vector2(3.0, 0.0) },
-			alpha = { target = 1.0 }
-		})
+		Anim.schedule_scale(self, Vector2(0.95, 0.95), Vector2.ONE)
+		Anim.schedule_fade(self, 1.0)
 		await Anim.run(0.3)
 	if modulate.a == 1.0:
 		is_show = true

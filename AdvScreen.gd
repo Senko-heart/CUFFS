@@ -300,14 +300,12 @@ func update_(flush: bool, wait: bool = false) -> void:
 				info.local_position += info.down_param.pt
 				anim.position.target = info.local_position
 				anim.position.accel = Vector2(info.down_param.accel, 0)
-				anim.target = bustup_man.spr[i]
 			elif info.status == 128:
 				info.local_position += info.leave_param.pt
 				anim.position.target = info.local_position
 				anim.position.accel = Vector2(info.leave_param.accel, 0)
 				if info.leave_param.fade:
 					anim.alpha = { target = 0.0 }
-				anim.target = dummy_bu_leave[i]
 			anims.append(anim)
 	else:
 		for i in range(bustup_size):
@@ -338,8 +336,7 @@ func update_(flush: bool, wait: bool = false) -> void:
 		Anim.property(trans_base, "material:t", activation_wait)
 		if scroll:
 			Anim.flush(spr_cg)
-			Anim.run_single({
-				target = spr_cg,
+			Anim.run_single(spr_cg, {
 				position = {
 					target = Vector2(scrl_param.pt),
 					accel = Vector2(scrl_param.accel, 0.0)},
@@ -353,11 +350,13 @@ func update_(flush: bool, wait: bool = false) -> void:
 		var info := bustup_man.info[i]
 		if info.status == 16:
 			if not flush:
-				Anim.run_single(anims[i], info.down_param.time / 1000.0)
+				var target := bustup_man.spr[i]
+				Anim.run_single(target, anims[i], info.down_param.time / 1000.0)
 			info.status = 2
 		elif info.status == 128:
 			if not flush:
-				Anim.run_single(anims[i], info.leave_param.time / 1000.0)
+				var target := dummy_bu_leave[i]
+				Anim.run_single(target, anims[i], info.leave_param.time / 1000.0)
 				bustup_man.clear_at(i)
 		# It's possible to skip awaiting both actions.
 		# The original waits. Doesn't seem to be intended?
@@ -741,14 +740,9 @@ func setup_select_item() -> void:
 
 func show_select_item() -> void:
 	if Global.cnf_obj.screen_effect == ScreenEffect.Normal:
-		var anim := {
-			scale = {
-				target = Vector2.ONE,
-				base = Vector2(0.95, 0.95),
-				accel = Vector2(3.0, 0.0)},
-			alpha = { target = 1.0 }}
 		for item in spr_select:
-			Anim.schedule(item, anim)
+			Anim.schedule_scale(item, Vector2(0.95, 0.95), Vector2.ONE)
+			Anim.schedule_fade(item, 1.0)
 		Anim.run(0.3)
 	else:
 		for item in spr_select:
@@ -931,8 +925,7 @@ func effect_flush(color: String, time: int, _cg_file: String) -> void:
 func scroll_(x: int, y: int, time: int, accel: int) -> void:
 	if not set_cg:
 		Anim.flush(spr_cg)
-		Anim.run_single({
-			target = spr_cg,
+		Anim.run_single(spr_cg, {
 			position = {
 				target = Vector2(-x, -y),
 				accel = Vector2(accel, 0.0)},
@@ -978,8 +971,7 @@ func zoom_(cx: int, cy: int, w: int, h: int, time: int = 0, accel: int = 0) -> v
 		zoom = false
 	anim.position.accel = Vector2(accel, 0.0)
 	anim.scale.accel = Vector2(accel, 0.0)
-	anim.target = adv_base
-	Anim.run_single(anim, time / 1000.0)
+	Anim.run_single(adv_base, anim, time / 1000.0)
 	if (Global.cnf_obj.screen_effect == ScreenEffect.None
 	or is_skip() or is_key_update_flush()):
 		Anim.flush(adv_base)
@@ -1034,7 +1026,7 @@ func end_animation() -> void:
 			texture.set_frame(0)
 			spr.queue_redraw()
 
-func create_capture() -> Texture2D:
+func create_capture(hud: bool = true) -> Texture2D:
 	capture_viewport = SubViewport.new()
 	capture_viewport.size = Global.screen_size
 	capture_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
@@ -1042,35 +1034,36 @@ func create_capture() -> Texture2D:
 	capture_viewport.add_child(spr_cg.duplicate())
 	for spr in bustup_man.spr:
 		capture_viewport.add_child(spr.duplicate())
-	var hl := CanvasLayer.new()
-	hl.layer = Layer.Hud
-	var msg_frm := MessageFrame.new()
-	msg_frm.create()
-	msg_frm._show(true)
-	msg_frm.view(msg_frame.get_view(), true)
-	msg_frm.enable(false)
-	msg_frm.skip(skip)
-	msg_frm.auto_mode(auto_mode)
-	msg_frm.apply_sequence(msg_sequence)
-	msg_frm.output(
-		msg_frame.mspr_name.message,
-		msg_frame.mspr_mess.message,
-		true)
-	if msg_frame.is_show_blink():
-		msg_frm.is_shown_blink_hit = true
-		msg_frm.spr_blink.position = msg_frame.spr_blink.position
-		msg_frm.spr_blink.modulate.a = 1.0
-	hl.add_child(msg_frm)
-	for spr in spr_select:
-		var sel := Global.frame_skin.create_form_page(&"ID_PAGE_ADVSELECT")
-		sel.pivot_offset = spr.pivot_offset
-		sel.position = spr.position
-		sel.name = spr.name
-		var sel_text: MessageSprite = sel.get_node("ID_TEXT")
-		var choice: MessageSprite = spr.get_node("ID_TEXT")
-		sel_text.output_message(choice.message)
-		hl.add_child(sel)
-	capture_viewport.add_child(hl)
+	if hud:
+		var hl := CanvasLayer.new()
+		hl.layer = Layer.Hud
+		var msg_frm := MessageFrame.new()
+		msg_frm.create()
+		msg_frm._show(true)
+		msg_frm.view(msg_frame.get_view(), true)
+		msg_frm.enable(false)
+		msg_frm.skip(skip)
+		msg_frm.auto_mode(auto_mode)
+		msg_frm.apply_sequence(msg_sequence)
+		msg_frm.output(
+			msg_frame.mspr_name.message,
+			msg_frame.mspr_mess.message,
+			true)
+		if msg_frame.is_show_blink():
+			msg_frm.is_shown_blink_hit = true
+			msg_frm.spr_blink.position = msg_frame.spr_blink.position
+			msg_frm.spr_blink.modulate.a = 1.0
+		hl.add_child(msg_frm)
+		for spr in spr_select:
+			var sel := Global.frame_skin.create_form_page(&"ID_PAGE_ADVSELECT")
+			sel.pivot_offset = spr.pivot_offset
+			sel.position = spr.position
+			sel.name = spr.name
+			var sel_text: MessageSprite = sel.get_node("ID_TEXT")
+			var choice: MessageSprite = spr.get_node("ID_TEXT")
+			sel_text.output_message(choice.message)
+			hl.add_child(sel)
+		capture_viewport.add_child(hl)
 	capture_viewport.render_target_update_mode = SubViewport.UPDATE_ONCE
 	await RenderingServer.frame_post_draw
 	return capture_viewport.get_texture()

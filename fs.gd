@@ -6,6 +6,7 @@ var voice := ZR.new()
 var sound := ZR.new()
 var patch := ZR.new()
 var decensor := ZR.new()
+var hires := ZR.new()
 
 var frame := ZR.new()
 var option := ZR.new()
@@ -39,6 +40,7 @@ func _open_archives() -> void:
 	sound.open(root.path_join("sound.zip"))
 	patch.open(root.path_join("patch.zip"))
 	decensor.open(root.path_join("decensor.zip"))
+	hires.open(root.path_join("hires.zip"))
 	
 	var system := root.path_join("system")
 	frame.open(system.path_join("frame.zip"))
@@ -195,10 +197,11 @@ func load_texture(
 	if key in texture_cache:
 		return texture_cache[key]
 	var bytes := _try_load_first(
-		[decensor, patch, data1, data2],
+		[hires, decensor, patch, data1, data2],
 		filename + ".png",
 		case_sensitive
 	)
+	var is_hires := hires.file_exists(filename + ".png", case_sensitive)
 	if bytes.is_empty():
 		return null
 	var frames: Array[Texture2D] = []
@@ -208,7 +211,10 @@ func load_texture(
 		var end := measure_png(bytes, begin)
 		var image := Image.new()
 		image.load_png_from_buffer(bytes.slice(begin, end))
-		frames.append(ImageTexture.create_from_image(image))
+		var texture: Texture2D = ImageTexture.create_from_image(image)
+		if is_hires:
+			texture = ScaleTexture.new(texture, Vector2(0.5, 0.5))
+		frames.append(texture)
 		begin = end
 	if frames.size() != 1:
 		var atexture := AnimTexture.new(frames)

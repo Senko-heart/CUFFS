@@ -1565,7 +1565,7 @@ func player_proc(cid: StringName) -> bool:
 	if cid == &"ID_STOP":
 		if SoundSystem.is_play_bgm():
 			stop_bgm()
-			sel_play_bgm = true
+			sel_play_bgm = -1
 	elif cid == &"ID_BGM1":
 		play_bgm(0)
 	elif cid == &"ID_BGM2":
@@ -1629,7 +1629,7 @@ func play_bgm(id: int) -> void:
 
 func stop_bgm() -> void:
 	SoundSystem.stop_bgm(true)
-	is_play_bgm = 0
+	is_play_bgm = false
 
 func run() -> void:
 	cnf_play_bgm = Global.cnf_obj.play_bgm

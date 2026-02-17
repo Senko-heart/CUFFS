@@ -37,7 +37,8 @@ func _apply_texture(tex: Texture2D) -> void:
 
 func _draw() -> void:
 	var _pressed := button_pressed and (not noninteractive or toggle_mode)
-	var _hovered := is_hovered() and not noninteractive
+	var unhovered := not _pressed and MouseEmulation.was_last_emulated
+	var _hovered := is_hovered() and not unhovered and not noninteractive
 	var _disabled := disabled_copy if noninteractive else disabled
 	if _disabled:
 		if _pressed and tex_push_disabled:

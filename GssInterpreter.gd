@@ -371,7 +371,7 @@ func step_condition() -> StepResult:
 			if Global.is_load():
 				sat = Global.sc_obj.faux_clear
 			else:
-				sat = Global.is_game_clear()
+				sat = Global.is_game_clear() or Start.unlock_sora
 				Global.sc_obj.faux_clear = sat
 		else:
 			dead_depth = 0

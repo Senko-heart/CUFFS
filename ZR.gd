@@ -14,6 +14,9 @@ var compressed_size: PackedInt64Array
 var uncompressed_size: PackedInt64Array
 var crc32: PackedInt32Array
 
+func is_open() -> bool:
+	return file != null
+
 func open(path: String) -> void:
 	close()
 	file = FileAccess.open(path, FileAccess.READ)
@@ -71,8 +74,12 @@ func _build_file_map() -> Error:
 		return FAILED
 	return OK
 
+# Workaround for https://github.com/godotengine/godot/issues/115553
+func _file_seek_end(pos: int) -> void:
+	file.seek(file.get_length() + pos)
+
 func _locate_central_directory() -> Error:
-	file.seek_end(-22)
+	_file_seek_end(-22)
 	var eocd := file.get_buffer(22)
 	eocd.bswap32(0, 1)
 	var magic := eocd.decode_u32(0)
@@ -94,7 +101,7 @@ func _locate_central_directory() -> Error:
 	or 0xffff == total_entries \
 	or 0xffffffff == cd_size \
 	or 0xffffffff == cd_offset:
-		file.seek_end(-42)
+		_file_seek_end(-42)
 		var ecdl := file.get_buffer(20)
 		ecdl.bswap32(0, 1)
 		magic = ecdl.decode_u32(0)

@@ -12,3 +12,6 @@ system/
 wav2qoa/*.wav
 *.exe
 *.pck
+start.cfg
+*.apk
+*.apk.idsig

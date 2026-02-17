@@ -13,52 +13,83 @@ var option := ZR.new()
 var title := ZR.new()
 var scenario := ZR.new()
 
-var root := "."
+var root := ""
 var save_dir: String
 var _arcs_loaded := false
 
 var cache_hint := ""
 var texture_cache: Dictionary[String, Texture2D] = {}
 
+var trash_os := OS.get_name() == "Android"
+
 func _init() -> void:
-	match OS.get_name():
-		"Android":
-			var err := DisplayServer.file_dialog_show(
-				"%s directory" % ProjectSettings.get_setting("application/config/name"),
-				"", "", false,
-				DisplayServer.FILE_DIALOG_MODE_OPEN_DIR,
-				[],
-				_dir_cb
-			)
-			assert(err == OK, "Failed to open directory dialog.")
-		_: _open_archives()
+	if trash_os and not _load_uri():
+		var err := DisplayServer.file_dialog_show(
+			"%s directory" % ProjectSettings.get_setting("application/config/name"),
+			"", "", false,
+			DisplayServer.FILE_DIALOG_MODE_OPEN_DIR,
+			[],
+			_dir_cb
+		)
+		assert(err == OK, "Failed to open directory dialog.")
+	else: _open_archives()
 
 func _open_archives() -> void:
-	data1.open(root.path_join("data1.zip"))
-	data2.open(root.path_join("data2.zip"))
-	voice.open(root.path_join("voice.zip"))
-	sound.open(root.path_join("sound.zip"))
-	patch.open(root.path_join("patch.zip"))
-	decensor.open(root.path_join("decensor.zip"))
-	hires.open(root.path_join("hires.zip"))
+	var start_bytes := FileAccess.get_file_as_bytes(root + "start.cfg")
+	var start_text := start_bytes.get_string_from_utf8()
+	var cfg := ConfigFile.new()
+	if not start_bytes.is_empty() and not cfg.parse(start_text):
+		Start.load_from(cfg)
 	
-	var system := root.path_join("system")
+	data1.open(root + "data1.zip")
+	data2.open(root + "data2.zip")
+	voice.open(root + "voice.zip")
+	sound.open(root + "sound.zip")
+	patch.open(root + "patch.zip")
+	if Start.decensor:
+		decensor.open(root + "decensor.zip")
+		Start.store_decensor = decensor.is_open()
+	if Start.hires:
+		hires.open(root + "hires.zip")
+		Start.store_hires = hires.is_open()
+	
+	var system := root + "system"
 	frame.open(system.path_join("frame.zip"))
 	option.open(system.path_join("option.zip"))
 	title.open(system.path_join("title.zip"))
 	scenario.open(system.path_join("scenario.zip"))
 	
-	save_dir = root.path_join("save")
-	var dir := DirAccess.open(root)
-	dir.make_dir("save")
+	save_dir = root + "save"
+	if not trash_os:
+		var dir := DirAccess.open(root.trim_suffix("#"))
+		dir.make_dir("save")
+	
+	Start.dump_into(cfg)
+	var start_cfg := FileAccess.open(root + "start.cfg", FileAccess.WRITE)
+	if start_cfg != null:
+		start_cfg.store_string(cfg.encode_to_text())
 	
 	_arcs_loaded = true
+
+func _load_uri() -> bool:
+	var uri := FileAccess.get_file_as_string("user://uri")
+	if not uri.is_empty():
+		var art := Engine.get_singleton("AndroidRuntime")
+		if art.updatePersistableUriPermission(uri, true):
+			root = uri + "#"
+			return true
+	return false
 
 func _dir_cb(status: bool, paths: PackedStringArray, _ix: int) -> void:
 	if not(status and paths.size() > 0):
 		printerr("Failed to pick directory.")
 		return
-	root = paths[0]
+	var uri := paths[0]
+	var art := Engine.get_singleton("AndroidRuntime")
+	art.updatePersistableUriPermission(uri, true)
+	var tree_uri := FileAccess.open("user://uri",FileAccess.WRITE)
+	tree_uri.store_string(uri)
+	root = uri + "#"
 	_open_archives()
 
 func sync() -> void:
@@ -82,6 +113,10 @@ func _try_load_first(
 	case_sensitive: bool = true
 ) -> PackedByteArray:
 	for arc in arcs:
+		if Start.full and arc == patch:
+			var full_path := "full".path_join(path.get_file())
+			if arc.file_exists(full_path, case_sensitive):
+				return arc.read_file(full_path, case_sensitive)
 		if arc.file_exists(path, case_sensitive):
 			return arc.read_file(path, case_sensitive)
 	return []
@@ -131,6 +166,7 @@ func load_sound(
 func load_bgm(
 	filename: String,
 	bgm: Sound,
+	loop: bool = true,
 	case_sensitive: bool = false
 ) -> bool:
 	var hq := filename + ".wav"
@@ -157,10 +193,22 @@ func load_bgm(
 	else: stream = AudioStreamWAV.load_from_buffer(bytes)
 	bgm.stream = stream
 	bgm.filename = filename
+	if not loop:
+		return true
 	stream.loop_begin = bgm.rewind_pos
 	stream.loop_end = bgm.end_pos
-	if stream.loop_begin != -1:
-		stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	if stream.loop_begin == -1:
+		stream.loop_begin = 0
+	if stream.loop_end == -1:
+		if is_qoa:
+			var sbytes := bytes.slice(4, 8)
+			sbytes.bswap32()
+			stream.loop_end = sbytes.decode_u32(0)
+		else:
+			var byte_per_bloc := bytes.decode_u16(32)
+			var data_size := bytes.decode_u32(40)
+			stream.loop_end = data_size / byte_per_bloc
 	return true
 
 func load_image(
@@ -237,8 +285,9 @@ func load_save_bytes(filename: String) -> PackedByteArray:
 	return FileAccess.get_file_as_bytes(path)
 
 func open_save_file(path: String) -> FileAccess:
-	var dir := DirAccess.open(save_dir)
-	dir.make_dir_recursive(path.get_base_dir())
+	if not trash_os:
+		var dir := DirAccess.open(save_dir)
+		dir.make_dir_recursive(path.get_base_dir())
 	path = save_dir.path_join(path)
 	return FileAccess.open(path, FileAccess.WRITE)
 

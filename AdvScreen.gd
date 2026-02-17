@@ -56,6 +56,8 @@ var tone_filter := false
 var esc_menu := false
 var key_update_flush := false
 var capture_viewport: SubViewport
+var listen_skip_cancel := false
+var double_chars := RegEx.create_from_string("[ぁ-んァ-ン一-龯、。’０-９Ａ-ｚ…]")
 
 func _init() -> void:
 	adv_base_layer.layer = Layer.AdvBase
@@ -105,6 +107,12 @@ func _process(delta: float) -> void:
 			if texture is AnimTexture:
 				if texture.process(delta):
 					spr.queue_redraw()
+	if listen_skip_cancel:
+		if Input.is_action_just_pressed("hit", true):
+			Input.action_release("hit")
+			Input.action_release("hit_cancel")
+			skip_(false)
+			listen_skip_cancel = false
 
 func create() -> void:
 	if created: return
@@ -123,6 +131,7 @@ func create() -> void:
 	skip = false
 	auto_mode = false
 	set_visibility(true)
+	listen_skip_cancel = false
 	created = true
 
 func destroy() -> void:
@@ -411,10 +420,11 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 		await update_(flush)
 	var voice_plays := false
 	var voice_found := FS.exists_voice(msg_info.voice)
+	var message := TranslationTable.mess(msg_info.message)
 	if not load_end:
 		msg_frame.clear_page()
 		if not msg_frame.is_show:
-			await msg_frame._show()
+			msg_frame._show()
 		var names := Global.check_true_name(msg_info.name)
 		var true_name: String = names.true_name
 		var show_name: String = names.show_name
@@ -422,7 +432,6 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 			if msg_info.voice != "" and not flush:
 				voice_plays = play_voice(msg_info.voice)
 				await RenderingServer.frame_pre_draw
-		var message := TranslationTable.mess(msg_info.message)
 		msg_frame.apply_sequence(msg_sequence)
 		msg_frame.output(show_name, message, flush)
 		Global.sc_obj.name_log.add(msg_info.name)
@@ -441,10 +450,17 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 		Global.sys_obj.read_flag.set_(id)
 		if Global.cnf_obj.read_skip and is_skip():
 			skip_(false)
-	if is_skip():
-		if Input.is_action_just_pressed("hit", true):
-			skip_(false)
-	var auto_time := float(Global.cnf_obj.automode_speed) + 0.5
+	var autorel := float(Global.cnf_obj.automode_speed) / 8.0
+	var auto_time_voiced := 0.5 * pow(4.0, autorel)
+	var message_length := message.length() + double_chars.search_all(message).size()
+	var rt_cps := 0.025 + 0.04 * autorel if autorel <= 0.5 else 0.045 * pow(6.0, autorel - 0.5)
+	var cpsrel := float(Global.cnf_obj.message_speed) / 45.0
+	var scaling := 0.2 + (1.0 - pow(1.0 - cpsrel, 3.0)) / 0.703703703 * 0.8
+	var reading_time := rt_cps * pow(scaling, 1.0 - autorel) * message_length
+	var message_piece := message_length / 18.0
+	var staircase := floorf(message_piece) + 0.25 * pow(fmod(message_piece, 1.0), 2.0)
+	var contemplation_time := staircase * 0.25 * pow(4.0, autorel)
+	var auto_time := maxf(reading_time + contemplation_time, 0.5)
 	var auto_timer := get_tree().create_timer(auto_time)
 	var skip_throttle := get_tree().create_timer(0.033)
 	var loop := not is_skip()
@@ -472,6 +488,7 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 		or Input.is_action_just_pressed("skip"):
 			await get_tree().process_frame
 			skip_(true)
+			listen_skip_cancel = true
 			break
 		elif cid == "ID_AUTO" \
 		or Input.is_action_just_pressed("auto_mode"):
@@ -480,7 +497,7 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 			else:
 				auto_mode_(true)
 				msg_frame.hide_blink()
-				auto_timer = get_tree().create_timer(auto_time)
+				auto_timer = get_tree().create_timer(contemplation_time)
 		elif cid == "ID_QLOAD" \
 		or Input.is_action_just_pressed("quick_load"):
 			if not Global.is_recollect_mode() and Global.sc_obj_qsave:
@@ -520,18 +537,19 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 				if ret != GameLogic.Unaffected:
 					break
 		elif cid == "ID_VOICE":
-			SoundSystem.play_voice(Global.sc_obj.voice_log.nth_back(0), true)
+			voice_plays = SoundSystem.play_voice(Global.sc_obj.voice_log.nth_back(0), true)
 		elif Input.is_action_pressed("fast_forward"):
 			break
-		elif is_auto_mode():
+		elif is_auto_mode() or voice_wait:
 			if msg_frame.is_pending():
-				pass
-			elif voice_plays and not SoundSystem.is_play_voice():
-				loop = false
+				if auto_timer.time_left < contemplation_time:
+					auto_timer = get_tree().create_timer(contemplation_time)
+			elif voice_plays:
+				if not SoundSystem.is_play_voice():
+					voice_plays = false
+					var min_time := minf(auto_time_voiced, maxf(0.5, auto_timer.time_left))
+					auto_timer = get_tree().create_timer(min_time)
 			elif not(auto_timer.time_left > 0.0):
-				loop = false
-		elif voice_wait:
-			if voice_plays and not SoundSystem.is_play_voice():
 				loop = false
 		if not msg_frame.is_show_blink() \
 		and not msg_frame.is_pending() \
@@ -603,6 +621,7 @@ func start_select() -> GameLogic:
 	enter_select()
 	setup_select_item()
 	show_select_item()
+	listen_skip_cancel = false
 	var _select := 0
 	while true:
 		var control := await Global.poll_ui_event()

@@ -104,6 +104,8 @@ func set1(type: int, start: float, life: float = 0.0,
 	pt_end: Vector2 = pt_start,
 	pos: int = 0, pt_center: Vector2 = Vector2.ZERO
 ) -> void:
+	if exit:
+		return
 	set0(type, start, life, res, pt_start, pt_end, pos, pt_center)
 	var start_time := task[-1].begin_time
 	while elapsed_time() < start_time:
@@ -156,7 +158,7 @@ func run(type: int) -> void:
 	exit = false
 	layer = Global.Layer.Movie
 	if Global.cnf_obj.play_bgm:
-		FS.load_bgm("BGM02", sound)
+		FS.load_bgm("BGM02", sound, false)
 		sound.volume_linear = Global.cnf_obj.vol_bgm
 		sound.play()
 	Global.adv.hide_message(true)

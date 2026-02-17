@@ -32,19 +32,9 @@ func reset_tag_stack() -> void:
 	message_ended = false
 	if nvl_effect:
 		push_customfx(NovelEffect.new(self), {})
-	var font_not_pushed := true
-	if not face.is_empty():
-		var fv := Global.get_font_variation(face, use_bold, use_italics)
-		if fv:
-			push_font(fv)
-			font_not_pushed = false
-	if font_not_pushed:
-		if use_bold:
-			push_bold()
-		if use_italics:
-			push_italics()
-	if font_size != 0:
-		push_font_size(font_size)
+	var fv := Global.get_font_variation(face, use_bold, use_italics)
+	if fv: push_font(fv, font_size)
+	elif font_size != 0: push_font_size(font_size)
 	add_text(message.replace(".", "․"))
 	pop_all()
 

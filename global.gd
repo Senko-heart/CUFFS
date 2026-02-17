@@ -74,6 +74,7 @@ var confirm_prompt: Dictionary[StringName, String] = {
 func _init() -> void:
 	sc_objects.resize(SAVE_NUM)
 	sc_obj_thumb_textures.resize(SAVE_NUM)
+	font_base[""] = font_base["MS Gothic"]
 
 func _ready() -> void:
 	await FS.sync()
@@ -106,6 +107,10 @@ func _process(_delta: float) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		await ask_game_exit()
+	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		Input.action_press("hit_cancel")
+		await get_tree().process_frame
+		Input.action_release("hit_cancel")
 
 func wait(action: StringName, time: float) -> bool:
 	if Input.is_action_just_pressed(action):
@@ -154,12 +159,11 @@ func poll_ui_event() -> Control:
 	return ui_event_control
 
 var font_base: Dictionary[String, Dictionary] = {
+	"MS Gothic": {
+		font = preload("res://msgothic.ttc")
+	},
 	"MS Mincho": {
-		font = preload("res://msmincho.ttc"),
-		normal_face_index = 0,
-		mono_face_index = 1,
-		embolden = 0.4,
-		faux_slant = 0.2
+		font = preload("res://msmincho.ttc")
 	}
 }
 
@@ -173,15 +177,15 @@ func get_font_variation(
 	if face not in font_base: return null
 	if face not in font_variations:
 		font_variations[face] = []
-		font_variations[face].resize(8)
+		font_variations[face].resize(4)
 	var fontvars := font_variations[face]
 	var varidx := int(bold) + (int(italic) << 1)
 	if fontvars[varidx]: return fontvars[varidx]
 	var fontbase := font_base[face]
 	var fv := FontVariation.new()
 	fv.base_font = fontbase.font
-	if bold: fv.variation_embolden = fontbase.get(&"embolden", 0)
-	if italic: fv.variation_transform.y.x = fontbase.get(&"faux_slant", 0)
+	if bold: fv.variation_embolden = fontbase.get(&"embolden", 0.4)
+	if italic: fv.variation_transform.y.x = fontbase.get(&"faux_slant", 0.2)
 	fv.variation_face_index = fontbase.get(&"face_index", 0)
 	fontvars[varidx] = fv
 	return fv
@@ -239,7 +243,7 @@ func play_movie(filename: String) -> void:
 	var movie_layer := CanvasLayer.new()
 	var player := VideoStreamPlayer.new()
 	var stream := VideoStreamTheora.new()
-	stream.file = FS.root.path_join(filename)
+	stream.file = FS.root + filename
 	player.stream = stream
 	movie_layer.layer = Layer.Movie
 	add_child(movie_layer)
@@ -652,10 +656,10 @@ func title() -> GameAction:
 	spr_menu.position = Vector2(313, 324)
 	add_child(spr_menu)
 	var mspr_version := MessageSprite.new()
-	mspr_version.create_message(70 + 12, 20)
+	mspr_version.create_message(70, 20)
 	mspr_version.attach_message_style(title_skin, "ID_FONT_VERSION")
 	mspr_version.position = Vector2(screen_size) - mspr_version.size
-	mspr_version.output_message("Ver 1.00β")
+	mspr_version.output_message("Ver 1.00")
 	mspr_version.modulate.a = 0.0
 	add_child(mspr_version)
 	Anim.fade(mspr_version, 1.0, 0.5)

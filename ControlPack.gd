@@ -26,9 +26,12 @@ func _init(arc: StringName) -> void:
 				_frame[frame.id] = frame
 
 func _try_load(src: String, case_sensitive: bool = false) -> PackedByteArray:
+	var full_src := "full".path_join(src)
 	var patch_src := _arc_name.path_join(src)
 	if FS.decensor.file_exists(patch_src, case_sensitive):
 		return FS.decensor.read_file(patch_src, case_sensitive)
+	if Start.full and FS.patch.file_exists(full_src, case_sensitive):
+		return FS.patch.read_file(full_src, case_sensitive)
 	if FS.patch.file_exists(patch_src, case_sensitive):
 		return FS.patch.read_file(patch_src, case_sensitive)
 	if _arc.file_exists(src, case_sensitive):

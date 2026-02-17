@@ -8,13 +8,18 @@
 
 config_version=5
 
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
 [application]
 
 config/name="ヨスガノソラ"
-config/version="0.99"
+config/version="1.00"
 run/main_scene="uid://soibbmkveucu"
 config/auto_accept_quit=false
-config/features=PackedStringArray("4.5", "GL Compatibility")
+config/quit_on_go_back=false
+config/features=PackedStringArray("4.6", "GL Compatibility")
 run/max_fps=480
 run/low_processor_mode=true
 boot_splash/bg_color=Color(0, 0, 0, 1)
@@ -27,6 +32,8 @@ buses/default_bus_layout=""
 
 [autoload]
 
+MouseEmulation="*uid://dav806hehb4mw"
+Start="*uid://c4l1kcqtkp3xx"
 FS="*res://fs.gd"
 Global="*res://global.gd"
 Anim="*res://Anim.gd"
@@ -157,4 +164,5 @@ save={
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
 environment/defaults/default_clear_color=Color(0, 0, 0, 1)

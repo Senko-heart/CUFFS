@@ -17,7 +17,7 @@ func load_table_rows(filename: String, case_sensitive: bool = true) -> PackedStr
 	var src := filename + ".tl"
 	var patch_src := "scenario".path_join(src)
 	var bytes: PackedByteArray
-	if FS.patch.file_exists(patch_src, case_sensitive):
+	if Start.translated and FS.patch.file_exists(patch_src, case_sensitive):
 		bytes = FS.patch.read_file(patch_src, case_sensitive)
 	elif FS.scenario.file_exists(src, case_sensitive):
 		bytes = FS.scenario.read_file(src, case_sensitive)

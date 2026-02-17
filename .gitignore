@@ -15,3 +15,5 @@ wav2qoa/*.wav
 start.cfg
 *.apk
 *.apk.idsig
+release.keystore
+*.x86_64

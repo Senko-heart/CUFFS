@@ -1,17 +1,32 @@
 extends Node
 
+var line_joiner := ""
+
 var name_tbl: Dictionary[String, String]
 var mess_tbl: Dictionary[int, PackedStringArray] = {}
 var choice_tbl: Dictionary[int, String] = {}
 var system_tbl: Dictionary[String, String] = {}
 
 func initialize() -> void:
+	load_options()
 	load_table("name", name_tbl)
 	load_table("mess", mess_tbl)
 	load_table("choice", choice_tbl)
 	load_table("system", system_tbl)
 	for key in system_tbl:
 		Global.confirm_prompt[key] = system_tbl[key]
+
+func load_options(case_sensitive: bool = true) -> void:
+	var patch_src := "scenario/options.cfg"
+	var bytes: PackedByteArray
+	if Start.translated and FS.patch.file_exists(patch_src, case_sensitive):
+		bytes = FS.patch.read_file(patch_src, case_sensitive)
+	else: return
+	var string := bytes.get_string_from_utf8()
+	var config_file := ConfigFile.new()
+	if string.is_empty() or config_file.parse(string):
+		return
+	line_joiner = config_file.get_value("Options", "line_joiner", "")
 
 func load_table_rows(filename: String, case_sensitive: bool = true) -> PackedStringArray:
 	var src := filename + ".tl"
@@ -52,7 +67,7 @@ func name_(show_name: String) -> String:
 func mess(id: int) -> String:
 	if id not in mess_tbl:
 		return "MISSING"
-	return "".join(mess_tbl[id])\
+	return line_joiner.join(mess_tbl[id])\
 		.replace("／", "\n")\
 		.replace("　", "  ")
 

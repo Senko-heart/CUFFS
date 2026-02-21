@@ -129,7 +129,9 @@ func step() -> StepResult:
 			li = rim.get_end()
 			var r := rim.strings[0]
 			open_regions[r] = false
-			return enough(StepResult.Finished)
+			if not evaluatable():
+				return enough(StepResult.Finished)
+			return enough()
 		elif not evaluatable():
 			return StepResult.Ok
 		

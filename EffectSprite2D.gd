@@ -12,9 +12,17 @@ var effect := EffectParam.new():
 			queue_redraw()
 
 var elapsed_time := 0.0
+var texture_scale := Vector2.ONE
 
 func _init() -> void:
 	texture_repeat = CanvasItem.TEXTURE_REPEAT_ENABLED
+	texture_changed.connect(on_texture_changed)
+
+func on_texture_changed() -> void:
+	if texture is ScaleTexture:
+		texture_scale = texture.scale
+	else:
+		texture_scale = Vector2.ONE
 
 func _process(delta: float) -> void:
 	elapsed_time += delta
@@ -22,8 +30,8 @@ func _process(delta: float) -> void:
 		var interval := effect.interval / 1000.0
 		var change := int(elapsed_time / interval)
 		elapsed_time -= change * interval
-		region_rect.position -= Vector2(effect.pt_speed * change)
-		region_rect.position = region_rect.position.posmodv(region_rect.size)
+		region_rect.position -= Vector2(effect.pt_speed * change) / texture_scale
+		region_rect.position = region_rect.position.posmodv(region_rect.size / texture_scale)
 		if change > 0:
 			queue_redraw()
 

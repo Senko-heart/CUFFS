@@ -617,6 +617,7 @@ func start_select() -> GameLogic:
 			msg_info.clear()
 			select_result = Global.sc_obj.select[Global.sc_obj.select_count]
 			Global.sc_obj.select_count += 1
+			select_item.clear()
 			return GameLogic.Unaffected
 		Global.leave_load()
 	Global.sc_obj.in_select = true

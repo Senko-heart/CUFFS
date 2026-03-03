@@ -17,7 +17,7 @@ var msg_info := MessageInfo.new()
 var req_font := false
 var msg_sequence := {}
 var adv_base_layer := CanvasLayer.new()
-var adv_base := Node2D.new()
+var adv_base := CanvasGroup.new()
 var spr_cg := EffectSprite2D.new()
 var cg := CgInfo.new()
 var bustup_man := BustupManager.new(5)
@@ -42,6 +42,7 @@ var trans_layer := CanvasLayer.new()
 var trans_base := TextureRect.new()
 var trans_mat := Blender.new()
 var dummy_view := SubViewport.new()
+var dummy_base := CanvasGroup.new()
 var dummy_cg := EffectSprite2D.new()
 var dummy_bu: Array[Sprite2D] = []
 var dummy_bu_leave: Array[Sprite2D] = []
@@ -62,10 +63,10 @@ var double_chars := RegEx.create_from_string("[ぁ-んァ-ン一-龯、。’０
 func _init() -> void:
 	adv_base_layer.layer = Layer.AdvBase
 	add_child(adv_base_layer)
+	adv_base.clear_margin = 0.0
+	adv_base.fit_margin = 0.0
 	adv_base_layer.add_child(adv_base)
 	spr_cg.centered = false
-	spr_cg.use_parent_material = true
-	spr_cg.z_index = RenderingServer.CANVAS_ITEM_Z_MIN
 	adv_base.add_child(spr_cg)
 	adv_base.add_child(bustup_man)
 	trans_layer.layer = Layer.Trans
@@ -75,20 +76,21 @@ func _init() -> void:
 	trans_base.size = Global.screen_size
 	trans_base.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	trans_base.material = trans_mat
-	trans_base.z_index = RenderingServer.CANVAS_ITEM_Z_MIN
 	trans_layer.add_child(trans_base)
 	dummy_view.size_2d_override = Global.screen_size
 	dummy_view.size_2d_override_stretch = true
 	dummy_view.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	trans_layer.add_child(dummy_view)
+	dummy_base.clear_margin = 0.0
+	dummy_base.fit_margin = 0.0
+	dummy_view.add_child(dummy_base)
 	dummy_cg.centered = false
-	dummy_cg.z_index = spr_cg.z_index
 	dummy_cg.set_process(false)
-	dummy_view.add_child(dummy_cg)
+	dummy_base.add_child(dummy_cg)
 	for i in range(bustup_man.spr.size()):
 		dummy_bu.append(Sprite2D.new())
 		dummy_bu[i].centered = false
-		dummy_view.add_child(dummy_bu[i])
+		dummy_base.add_child(dummy_bu[i])
 		dummy_bu_leave.append(Sprite2D.new())
 		dummy_bu_leave[i].centered = false
 		trans_layer.add_child(dummy_bu_leave[i])
@@ -233,16 +235,15 @@ func update_(flush: bool, wait: bool = false) -> void:
 		activation_wait = trans_info.time / 1000.0
 	var bustup_size := bustup_man.info.size()
 	if not flush:
+		dummy_base.material = adv_base.material
 		dummy_cg.transform = spr_cg.transform
 		dummy_cg.texture = spr_cg.texture
 		dummy_cg.copy_effect(spr_cg)
-		dummy_cg.material = adv_base.material
 		for i in range(bustup_size):
 			var info := bustup_man.info[i]
 			var nonleave := info.status != 128
 			var dumbu := dummy_bu[i] if nonleave else dummy_bu_leave[i]
 			bustup_man.copy_spr_at(i, dumbu)
-			dumbu.material = adv_base.material
 		dummy_view.size = get_viewport().size
 		dummy_view.render_target_update_mode = SubViewport.UPDATE_ONCE
 		await RenderingServer.frame_post_draw
@@ -258,6 +259,7 @@ func update_(flush: bool, wait: bool = false) -> void:
 		spr_cg.position = -cg.pt
 		wait = true
 	if set_bustup:
+		bustup_man.sort_priority(false)
 		for i in range(bustup_size):
 			if bustup_man.info[i].status != 2:
 				var spr := bustup_man.spr[i]
@@ -271,7 +273,6 @@ func update_(flush: bool, wait: bool = false) -> void:
 				pass
 			elif info.status != 0 and info.status != 8:
 				load_bustup(spr, info)
-				spr.z_index = -info.priority
 				spr.show()
 			else:
 				spr.texture = null
@@ -901,12 +902,11 @@ func set_transition(type: String, time: int) -> void:
 	trans_info.time = time
 
 func effect_quake(w: int, h: int, whole: bool, count: int, time: int) -> void:
-	var target := adv_base
+	var target: Node2D = adv_base
 	if not whole:
 		target = spr_cg.duplicate()
 		target.modulate.a = 0.6171875
-		target.z_index += 1
-		adv_base.add_child(target)
+		spr_cg.add_sibling(target)
 	var pos := target.position
 	var v := Vector2(w, h)
 	if time == 0:

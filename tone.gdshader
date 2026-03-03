@@ -1,4 +1,8 @@
 shader_type canvas_item;
+render_mode unshaded;
+
+uniform sampler2D screen_texture : hint_screen_texture,
+repeat_disable, filter_nearest;
 
 uniform sampler2D tone_tables;
 uniform bool yuv_filter;
@@ -30,5 +34,6 @@ vec4 tonemapping(vec4 color, sampler2D tables, bool yuv) {
 }
 
 void fragment() {
-	COLOR = tonemapping(COLOR, tone_tables, yuv_filter);
+	vec4 color = textureLod(screen_texture, SCREEN_UV, 0.0);
+	COLOR = tonemapping(color, tone_tables, yuv_filter);
 }

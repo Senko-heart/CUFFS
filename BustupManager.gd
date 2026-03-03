@@ -8,7 +8,6 @@ var info: Array[BustupInfo]
 var spr: Array[Sprite2D]
 
 func _init(size: int) -> void:
-	use_parent_material = true
 	for i in range(size):
 		info.append(BustupInfo.new())
 		var _spr := Sprite2D.new()
@@ -22,7 +21,7 @@ func copy_spr_at(i: int, copy_to: Sprite2D) -> void:
 	copy_to.texture = spr[i].texture
 	copy_to.offset = spr[i].offset
 	copy_to.position = spr[i].position
-	copy_to.z_index = spr[i].z_index
+	copy_to.material = material
 
 func clear_at(i: int) -> void:
 	info[i].clear()
@@ -135,15 +134,31 @@ func num_people() -> int:
 
 func sort_priority(descend: bool) -> void:
 	if descend:
-		info.sort_custom(func(a: BustupInfo, b: BustupInfo) -> bool:
+		sort_custom(func(a: BustupInfo, b: BustupInfo) -> bool:
 			return a.priority > b.priority)
 	else:
-		info.sort_custom(func(a: BustupInfo, b: BustupInfo) -> bool:
+		sort_custom(func(a: BustupInfo, b: BustupInfo) -> bool:
 			return a.priority < b.priority)
 
 func sort_relation() -> void:
-	info.sort_custom(func(a: BustupInfo, b: BustupInfo) -> bool:
+	sort_custom(func(a: BustupInfo, b: BustupInfo) -> bool:
 		return a.relation < b.relation)
+
+func sort_custom(cmp: Callable) -> void:
+	var size := info.size()
+	for i in range(size):
+		for j in range(i - 1, -1, -1):
+			var a := info[j + 1]
+			var b := info[j]
+			if cmp.call(a, b):
+				break
+			info[j] = a
+			info[j + 1] = b
+			var t := spr[j + 1]
+			spr[j + 1] = spr[j]
+			spr[j] = t
+	for i in range(size):
+		move_child(spr[i], i)
 
 func adjust_position() -> void:
 	var id_rel: Array[BustupInfo] = []

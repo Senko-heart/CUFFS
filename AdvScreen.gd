@@ -257,6 +257,7 @@ func update_(flush: bool, wait: bool = false) -> void:
 			create_color_texture(spr_cg, col_set_cg_rgb)
 		spr_cg.effect = cg.effect_param
 		spr_cg.position = -cg.pt
+		bustup_man.material = cg.sunlight_material()
 		wait = true
 	if set_bustup:
 		bustup_man.sort_priority(false)

@@ -3,6 +3,7 @@ extends Node
 const ScreenType := ConfigDataBase.ScreenType
 const ScreenEffect := ConfigDataBase.ScreenEffect
 const StepResult := GssInterpreter.StepResult
+const TimeZone := CgInfo.TimeZone
 var TRIAL := false
 var TECHGIAN := false
 const SAVE_NUM := 60
@@ -1103,9 +1104,43 @@ func appreciation() -> void:
 func check_setup_cg(filename: String, cg_info: CgInfo) -> void:
 	var s := filename.to_upper()
 	cg_info.effect_param = EffectParam.new()
+	cg_info.time_zone = TimeZone.Daytime
 	if s.is_empty(): pass
 	elif s == &"BLACK": pass
 	elif s == &"WHITE": pass
+	elif s == &"B01B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B01C": cg_info.time_zone = TimeZone.NightL
+	elif s == &"B05C": cg_info.time_zone = TimeZone.NightL
+	elif s == &"B07B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B07C": cg_info.time_zone = TimeZone.Night
+	elif s == &"B09B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B09C": cg_info.time_zone = TimeZone.Night
+	elif s == &"B12B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B12C": cg_info.time_zone = TimeZone.Night
+	elif s == &"B13C": cg_info.time_zone = TimeZone.Night
+	elif s == &"B14B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B15B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B15C": cg_info.time_zone = TimeZone.Night
+	elif s == &"B17B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B18B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B19B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B20B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B21B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B21E": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B22B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B23B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B25C": cg_info.time_zone = TimeZone.Night
+	elif s == &"B26C": cg_info.time_zone = TimeZone.Night
+	elif s == &"B29B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B33B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B33C": cg_info.time_zone = TimeZone.NightL
+	elif s == &"B34B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B34C": cg_info.time_zone = TimeZone.Night
+	elif s == &"B35B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B35C": cg_info.time_zone = TimeZone.NightL
+	elif s == &"B36B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B38B": cg_info.time_zone = TimeZone.Evening
+	elif s == &"B39B": cg_info.time_zone = TimeZone.Evening
 	elif check_cg(s, &"EA01A", 100, 101): pass
 	elif check_cg(s, &"EA01B", 100, 102): pass
 	elif check_cg(s, &"EA01C", 100, 103): pass
@@ -1336,6 +1371,7 @@ func check_setup_cg(filename: String, cg_info: CgInfo) -> void:
 		cg_info.effect_param.degree_step = 0
 		cg_info.effect_param.size_view = Vector2i(800, 600)
 		cg_info.effect_param.pt_speed = Vector2i(1, 0)
+		cg_info.time_zone = TimeZone.Evening
 	elif check_cg(s, &"EZ02", 1010, 1011): pass
 	elif check_cg(s, &"EZ03", 1020, 1021): pass
 	elif check_cg(s, &"EZ04A", 1030, 1031): pass
@@ -1353,7 +1389,6 @@ func check_setup_cg(filename: String, cg_info: CgInfo) -> void:
 	elif check_cg(s, &"EZ07", 1060, 1061): pass
 	elif check_cg(s, &"EZ08", 1070, 1071): pass
 	elif check_cg(s, &"SP"): pass
-	cg_info.time_zone = 1
 	cg_info.filename = s
 
 func check_setup_bustup(filename: String, _timezone: int) -> BustupInfo:

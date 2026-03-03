@@ -1,13 +1,24 @@
 class_name CgInfo
 extends LoaderHelper
 
-var time_zone := 0
+enum TimeZone {
+	Unspecified,
+	Daytime,
+	DaytimeRain,
+	Evening,
+	EveningRain,
+	Night,
+	NightL,
+	Midnight,
+}
+
+var time_zone := TimeZone.Unspecified
 var filename := ""
 var pt := Vector2i.ZERO
 var effect_param := EffectParam.new()
 
 func clear() -> void:
-	time_zone = 0
+	time_zone = TimeZone.Unspecified
 	filename = ""
 	pt = Vector2i.ZERO
 	effect_param.type = EffectParam.EffectType.Nothing

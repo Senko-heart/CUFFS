@@ -116,6 +116,7 @@ func destroy() -> void:
 	Anim.kill(spr_blink)
 	Anim.kill(spr_voice)
 	hide()
+	pre_name = ""
 	is_show = false
 	is_create = false
 

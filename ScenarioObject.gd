@@ -79,13 +79,6 @@ func load(dict: Dictionary) -> bool:
 	): pass
 	else: return false
 	
-	cg.clear()
-	if &"cg" in dict:
-		if dict.cg is not Dictionary:
-			return false
-		if not cg.load(dict.cg):
-			return false
-	
 	bustup.clear()
 	if &"bustup" in dict:
 		if dict.bustup is not Array:

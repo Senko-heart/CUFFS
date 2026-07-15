@@ -153,6 +153,22 @@ func set_visibility(vis: bool) -> void:
 	trans_layer.visible = vis
 	hud_layer.visible = vis
 
+var auto_time: float
+var auto_time_voiced: float
+var contemplation_time: float
+func compute_automode_times(message: String) -> void:
+	var autorel := float(Global.cnf_obj.automode_speed) / 8.0
+	auto_time_voiced = 0.5 * pow(4.0, autorel)
+	var message_length := message.length() + double_chars.search_all(message).size()
+	var rt_cps := 0.025 + 0.04 * autorel if autorel <= 0.5 else 0.045 * pow(6.0, autorel - 0.5)
+	var cpsrel := float(Global.cnf_obj.message_speed) / 45.0
+	var scaling := 0.2 + (1.0 - pow(1.0 - cpsrel, 3.0)) / 0.703703703 * 0.8
+	var reading_time := rt_cps * pow(scaling, 1.0 - autorel) * message_length
+	var message_piece := message_length / 18.0
+	var staircase := floorf(message_piece) + 0.25 * pow(fmod(message_piece, 1.0), 2.0)
+	contemplation_time = staircase * 0.25 * pow(4.0, autorel)
+	auto_time = maxf(reading_time + contemplation_time, 0.5)
+
 func name_(string: String, voice: String) -> void:
 	msg_info.name = string
 	msg_info.voice = voice
@@ -423,6 +439,8 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 	var voice_plays := false
 	var voice_found := FS.exists_voice(msg_info.voice)
 	var message := TranslationTable.mess(msg_info.message)
+	var packs := Global.adjust_message(message)
+	var pack := 0
 	if not load_end:
 		msg_frame.clear_page()
 		if not msg_frame.is_show:
@@ -435,7 +453,7 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 				voice_plays = play_voice(msg_info.voice)
 				await RenderingServer.frame_pre_draw
 		msg_frame.apply_sequence(msg_sequence)
-		msg_frame.output(show_name, message, flush)
+		msg_frame.output(show_name, packs[pack], flush)
 		Global.sc_obj.name_log.add(msg_info.name)
 		Global.sc_obj.mess_log.add(str(msg_info.message))
 		Global.sc_obj.seq_log.add(JSON.stringify(msg_sequence))
@@ -452,17 +470,7 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 		Global.sys_obj.read_flag.set_(id)
 		if Global.cnf_obj.read_skip and is_skip():
 			skip_(false)
-	var autorel := float(Global.cnf_obj.automode_speed) / 8.0
-	var auto_time_voiced := 0.5 * pow(4.0, autorel)
-	var message_length := message.length() + double_chars.search_all(message).size()
-	var rt_cps := 0.025 + 0.04 * autorel if autorel <= 0.5 else 0.045 * pow(6.0, autorel - 0.5)
-	var cpsrel := float(Global.cnf_obj.message_speed) / 45.0
-	var scaling := 0.2 + (1.0 - pow(1.0 - cpsrel, 3.0)) / 0.703703703 * 0.8
-	var reading_time := rt_cps * pow(scaling, 1.0 - autorel) * message_length
-	var message_piece := message_length / 18.0
-	var staircase := floorf(message_piece) + 0.25 * pow(fmod(message_piece, 1.0), 2.0)
-	var contemplation_time := staircase * 0.25 * pow(4.0, autorel)
-	var auto_time := maxf(reading_time + contemplation_time, 0.5)
+	compute_automode_times(packs[pack])
 	var auto_timer := get_tree().create_timer(auto_time)
 	var skip_throttle := get_tree().create_timer(0.033)
 	var loop := not is_skip()
@@ -473,6 +481,10 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 		or Input.is_action_just_pressed("ui_down"):
 			if msg_frame.is_pending():
 				msg_frame.flush_()
+			elif pack + 1 < packs.size():
+				pack += 1
+				msg_frame.hide_blink()
+				msg_frame.output(msg_frame.pre_name, packs[pack], flush)
 			else: break
 		elif cid == "ID_CLOSE" \
 		or Input.is_action_just_pressed("hit_cancel") \
@@ -552,7 +564,12 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 					var min_time := minf(auto_time_voiced, maxf(0.5, auto_timer.time_left))
 					auto_timer = get_tree().create_timer(min_time)
 			elif not(auto_timer.time_left > 0.0):
-				loop = false
+				if pack + 1 < packs.size():
+					pack += 1
+					msg_frame.output(msg_frame.pre_name, packs[pack], flush)
+					compute_automode_times(packs[pack])
+					auto_timer = get_tree().create_timer(auto_time)
+				else: loop = false
 		if not msg_frame.is_show_blink() \
 		and not msg_frame.is_pending() \
 		and not is_auto_mode():

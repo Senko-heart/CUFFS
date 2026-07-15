@@ -107,6 +107,10 @@ func measure_png(bytes: PackedByteArray, begin: int = 0) -> int:
 		type = info.decode_u32(4)
 	return begin
 
+func measure_webp(bytes: PackedByteArray, begin: int = 0) -> int:
+	begin += 8 + bytes.decode_s32(begin + 4)
+	return begin
+
 func _try_load_first(
 	arcs: Array[ZR],
 	path: String,
@@ -120,6 +124,20 @@ func _try_load_first(
 		if arc.file_exists(path, case_sensitive):
 			return arc.read_file(path, case_sensitive)
 	return []
+
+func _lookup_file(
+	arcs: Array[ZR],
+	basename: String,
+	extensions: PackedStringArray,
+	case_sensitive: bool = true
+) -> Vector2i:
+	for x in range(arcs.size()):
+		var arc := arcs[x]
+		for y in range(extensions.size()):
+			var path := basename + extensions[y]
+			if arc.file_exists(path, case_sensitive):
+				return Vector2i(x, y)
+	return Vector2i.MAX
 
 func load_voice(
 	filename: String,
@@ -244,14 +262,35 @@ func load_texture(
 	var key := filename if case_sensitive else filename.to_upper()
 	if key in texture_cache:
 		return texture_cache[key]
-	var bytes := _try_load_first(
-		[hires, decensor, patch, data1, data2],
-		filename + ".png",
-		case_sensitive
-	)
-	var is_hires := hires.file_exists(filename + ".png", case_sensitive)
+	var arcs: Array[ZR] = [hires, decensor, patch, data1, data2]
+	var exts: PackedStringArray = [".png", ".jpg", ".webp"]
+	var pos := _lookup_file(arcs, filename, exts, case_sensitive)
+	if Start.full:
+		var full_name := "full".path_join(filename)
+		var full_pos := _lookup_file(arcs, full_name, exts, case_sensitive)
+		if full_pos.x <= pos.x:
+			pos = full_pos
+			filename = full_name
+	if pos == Vector2i.MAX:
+		return null
+	var bytes := arcs[pos.x].read_file(filename + exts[pos.y], case_sensitive)
+	var is_hires := pos.x == 0
 	if bytes.is_empty():
 		return null
+	if pos.y == 0:
+		return _load_png_procedure(bytes, is_hires)
+	if pos.y == 1:
+		var image := Image.new()
+		image.load_jpg_from_buffer(bytes)
+		var texture: Texture2D = ImageTexture.create_from_image(image)
+		if is_hires:
+			texture = ScaleTexture.new(texture, Vector2(0.5, 0.5))
+		return texture
+	if pos.y == 2:
+		return _load_webp_procedure(bytes, is_hires)
+	return null
+
+func _load_png_procedure(bytes: PackedByteArray, is_hires: bool) -> Texture2D:
 	var frames: Array[Texture2D] = []
 	var begin := 0
 	var size := bytes.size()
@@ -259,6 +298,28 @@ func load_texture(
 		var end := measure_png(bytes, begin)
 		var image := Image.new()
 		image.load_png_from_buffer(bytes.slice(begin, end))
+		var texture: Texture2D = ImageTexture.create_from_image(image)
+		if is_hires:
+			texture = ScaleTexture.new(texture, Vector2(0.5, 0.5))
+		frames.append(texture)
+		begin = end
+	if frames.size() != 1:
+		var atexture := AnimTexture.new(frames)
+		if begin == size - 4:
+			var duration := bytes.decode_u32(begin)
+			atexture.set_duration(duration)
+		return atexture
+	else:
+		return frames[0]
+
+func _load_webp_procedure(bytes: PackedByteArray, is_hires: bool) -> Texture2D:
+	var frames: Array[Texture2D] = []
+	var begin := 0
+	var size := bytes.size()
+	while begin < size - 4:
+		var end := measure_webp(bytes, begin)
+		var image := Image.new()
+		image.load_webp_from_buffer(bytes.slice(begin, end))
 		var texture: Texture2D = ImageTexture.create_from_image(image)
 		if is_hires:
 			texture = ScaleTexture.new(texture, Vector2(0.5, 0.5))

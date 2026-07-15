@@ -233,6 +233,13 @@ func adjust_string(src: String, num: int) -> String:
 	)
 	return "\n".join(split)
 
+func adjust_message(mess: String) -> PackedStringArray:
+	var lines := mess.split("\n")
+	var size := lines.size()
+	return range(0, size, 3).map(func(n: int) -> String:
+		return "\n".join(lines.slice(n, min(n + 3, size)))
+	)
+
 func rgb(r: int, g: int, b: int) -> int:
 	return (r << 16) | (g << 8) | b
 
@@ -767,7 +774,7 @@ func save(filename: String, thumb: bool, id: int = -1) -> void:
 				thm.resize(dims.x, dims.y)
 			var texture := ImageTexture.create_from_image(thm)
 			sc_obj_thumb_textures[id] = texture
-	sc_obj.cg = adv.cg
+	sc_obj.cg.load(adv.cg.dump())
 	sc_obj.cg_rgb = adv.set_cg_rgb
 	sc_obj.col_set_cg_rgb = adv.col_set_cg_rgb
 	sc_obj.bustup.clear()
@@ -851,7 +858,7 @@ func leave_load() -> void:
 	var mess := TranslationTable.mess(int(sc_obj.mess_log.nth_back(0)))
 	var seq: Dictionary = JSON.parse_string(sc_obj.seq_log.nth_back(0))
 	adv.msg_frame.apply_sequence(seq)
-	adv.msg_frame.output(names.show_name, mess, true)
+	adv.msg_frame.output(names.show_name, adjust_message(mess)[0], true)
 	if sc_obj.voice_log.nth_back(0) != &"":
 		adv.msg_frame.show_voice()
 	else:
@@ -984,7 +991,7 @@ func eye_catch_enter(type: String, sound_keep: int) -> void:
 		return
 	type = type.to_upper()
 	SoundSystem.stop_voice()
-	if sound_keep != 0:
+	if sound_keep == 0:
 		SoundSystem.stop_env_se()
 		SoundSystem.stop_bgm()
 	await adv.hide_message()

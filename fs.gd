@@ -17,8 +17,7 @@ var root := ""
 var save_dir: String
 var _arcs_loaded := false
 
-var cache_hint := ""
-var texture_cache: Dictionary[String, Texture2D] = {}
+var rc := ResourceCache.new()
 
 var trash_os := OS.get_name() == "Android"
 
@@ -260,8 +259,14 @@ func load_texture(
 	case_sensitive: bool = false
 ) -> Texture2D:
 	var key := filename if case_sensitive else filename.to_upper()
-	if key in texture_cache:
-		return texture_cache[key]
+	cache_load_texture(filename, case_sensitive)
+	return rc.get_texture(key)
+
+func put_texture_on_load(
+	filename: String,
+	case_sensitive: bool = false
+) -> void:
+	var key := filename if case_sensitive else filename.to_upper()
 	var arcs: Array[ZR] = [hires, decensor, patch, data1, data2]
 	var exts: PackedStringArray = [".png", ".jpg", ".webp"]
 	var pos := _lookup_file(arcs, filename, exts, case_sensitive)
@@ -272,67 +277,17 @@ func load_texture(
 			pos = full_pos
 			filename = full_name
 	if pos == Vector2i.MAX:
-		return null
+		return
 	var bytes := arcs[pos.x].read_file(filename + exts[pos.y], case_sensitive)
 	var is_hires := pos.x == 0
 	if bytes.is_empty():
-		return null
+		return
 	if pos.y == 0:
-		return _load_png_procedure(bytes, is_hires)
-	if pos.y == 1:
-		var image := Image.new()
-		image.load_jpg_from_buffer(bytes)
-		var texture: Texture2D = ImageTexture.create_from_image(image)
-		if is_hires:
-			texture = ScaleTexture.new(texture, Vector2(0.5, 0.5))
-		return texture
-	if pos.y == 2:
-		return _load_webp_procedure(bytes, is_hires)
-	return null
-
-func _load_png_procedure(bytes: PackedByteArray, is_hires: bool) -> Texture2D:
-	var frames: Array[Texture2D] = []
-	var begin := 0
-	var size := bytes.size()
-	while begin < size - 4:
-		var end := measure_png(bytes, begin)
-		var image := Image.new()
-		image.load_png_from_buffer(bytes.slice(begin, end))
-		var texture: Texture2D = ImageTexture.create_from_image(image)
-		if is_hires:
-			texture = ScaleTexture.new(texture, Vector2(0.5, 0.5))
-		frames.append(texture)
-		begin = end
-	if frames.size() != 1:
-		var atexture := AnimTexture.new(frames)
-		if begin == size - 4:
-			var duration := bytes.decode_u32(begin)
-			atexture.set_duration(duration)
-		return atexture
-	else:
-		return frames[0]
-
-func _load_webp_procedure(bytes: PackedByteArray, is_hires: bool) -> Texture2D:
-	var frames: Array[Texture2D] = []
-	var begin := 0
-	var size := bytes.size()
-	while begin < size - 4:
-		var end := measure_webp(bytes, begin)
-		var image := Image.new()
-		image.load_webp_from_buffer(bytes.slice(begin, end))
-		var texture: Texture2D = ImageTexture.create_from_image(image)
-		if is_hires:
-			texture = ScaleTexture.new(texture, Vector2(0.5, 0.5))
-		frames.append(texture)
-		begin = end
-	if frames.size() != 1:
-		var atexture := AnimTexture.new(frames)
-		if begin == size - 4:
-			var duration := bytes.decode_u32(begin)
-			atexture.set_duration(duration)
-		return atexture
-	else:
-		return frames[0]
+		rc.load_png(key, bytes, is_hires)
+	elif pos.y == 1:
+		rc.load_jpg(key, bytes, is_hires)
+	elif pos.y == 2:
+		rc.load_webp(key, bytes, is_hires)
 
 func load_mask_texture(
 	filename: String,
@@ -353,17 +308,12 @@ func open_save_file(path: String) -> FileAccess:
 	return FileAccess.open(path, FileAccess.WRITE)
 
 func cache_reset(hint: String) -> bool:
-	if cache_hint != hint:
-		texture_cache.clear()
-		cache_hint = hint
-		return true
-	return false
+	return rc.clear(hint)
 
 func cache_load_texture(
 	filename: String,
 	case_sensitive: bool = false
 ) -> void:
 	var key := filename if case_sensitive else filename.to_upper()
-	if not key in texture_cache:
-		var texture := load_texture(key, case_sensitive)
-		texture_cache[key] = texture
+	if not rc.is_put_on_load(key):
+		put_texture_on_load(filename, case_sensitive)

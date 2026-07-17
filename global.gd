@@ -509,6 +509,9 @@ func chk_global_flag_on(i: int) -> bool:
 func is_recollect_mode() -> bool:
 	return recollect_mode
 
+func is_saveable() -> bool:
+	return not recollect_mode and not TECHGIAN
+
 func enter_recollect_mode() -> void:
 	recollect_mode = true
 
@@ -635,28 +638,43 @@ func logo() -> void:
 
 func title() -> GameAction:
 	SoundSystem.play_bgm("BGM07")
-	var spr_base := title_skin.create_texture_rect("ID_FRM_0611")
+	var spr_base: Control = title_skin.create_texture_rect("ID_FRM_0611")
+	if Start.yahiro:
+		var base := ModButton.new()
+		base.name = "ID_SWITCH"
+		base.tex_normal = spr_base.texture
+		spr_base.free()
+		spr_base = base
 	spr_base.modulate.a = 0.0
 	add_child(spr_base)
 	var spr_logo := title_skin.create_texture_rect("ID_FRM_0612")
 	spr_logo.modulate.a = 0.0
 	spr_logo.position = Vector2(223, 95)
 	add_child(spr_logo)
+	var spr_tg_logo: TextureRect
+	if Start.yahiro:
+		spr_tg_logo = title_skin.create_texture_rect("ID_FRM_0614")
+		spr_tg_logo.modulate.a = 0.0
+		spr_tg_logo.position = Vector2(369, 171)
+		add_child(spr_tg_logo)
 	var spr_sub_logo: TextureRect
-	if TECHGIAN:
-		spr_sub_logo = title_skin.create_texture_rect("ID_FRM_0614")
-		spr_sub_logo.modulate.a = 0.0
-		spr_sub_logo.position = Vector2(369, 171)
-		add_child(spr_sub_logo)
-	elif TRIAL:
+	if TRIAL:
 		spr_sub_logo = title_skin.create_texture_rect("ID_FRM_0613")
 		spr_sub_logo.modulate.a = 0.0
 		spr_sub_logo.position = Vector2(511, 171)
 		add_child(spr_sub_logo)
+	var spr_tg_menu: TextureRect
+	if Start.yahiro:
+		spr_tg_menu = title_skin.create_form_page("ID_PAGE_MENU_TG")
+		spr_tg_menu.modulate.a = 0.0
+		spr_tg_menu.position = Vector2(313, 324)
+		spr_tg_menu.hide()
+		var tg: ModButton = spr_tg_menu.get_node("ID_TG")
+		tg.margin_left = 25
+		tg.margin_right = 26
+		add_child(spr_tg_menu)
 	var spr_menu: TextureRect
-	if TECHGIAN:
-		spr_menu = title_skin.create_form_page("ID_PAGE_MENU_TG")
-	elif not TRIAL and is_game_clear():
+	if not TRIAL and is_game_clear():
 		spr_menu = title_skin.create_form_page("ID_PAGE_MENU_FULL")
 	else:
 		spr_menu = title_skin.create_form_page("ID_PAGE_MENU")
@@ -722,17 +740,32 @@ func title() -> GameAction:
 			await quick_load()
 			ret = GameAction.Continue
 			break
+		elif cid == "ID_SWITCH":
+			TECHGIAN = not TECHGIAN
+			if TECHGIAN: spr_tg_menu.show()
+			else: spr_menu.show()
+			var tg_alpha := 1.0 if TECHGIAN else 0.0
+			Anim.schedule_fade(spr_tg_logo, tg_alpha)
+			Anim.schedule_fade(spr_tg_menu, tg_alpha)
+			Anim.schedule_fade(spr_menu, 1.0 - tg_alpha)
+			await Anim.run(0.3)
+			if TECHGIAN: spr_menu.hide()
+			else: spr_tg_menu.hide()
 	SoundSystem.stop_bgm()
 	Anim.schedule_fade(mspr_version, 0.0)
 	Anim.schedule_fade(spr_logo, 0.0)
+	Anim.schedule_fade(spr_tg_logo, 0.0)
 	if spr_sub_logo: Anim.schedule_fade(spr_sub_logo, 0.0)
 	Anim.schedule_fade(spr_base, 0.0)
 	Anim.schedule_fade(spr_menu, 0.0)
+	Anim.schedule_fade(spr_tg_menu, 0.0)
 	var time := 3.0 if ret == GameAction.Start else 0.5
 	await Anim.run(time)
 	Anim.destroy(mspr_version)
-	Anim.destroy(spr_menu)                              
+	Anim.destroy(spr_menu)
+	if spr_tg_menu: Anim.destroy(spr_tg_menu)
 	if spr_sub_logo: Anim.destroy(spr_sub_logo)
+	if spr_tg_logo: Anim.destroy(spr_tg_logo)
 	Anim.destroy(spr_logo)
 	Anim.destroy(spr_base)
 	return ret

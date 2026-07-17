@@ -88,7 +88,7 @@ func create() -> void:
 	spr_base_0.modulate.a = Global.cnf_obj.window_depth
 	spr_base_1.modulate.a = 0.0
 	modulate.a = 0.0
-	var disable := Global.is_recollect_mode()
+	var disable := not Global.is_saveable()
 	var alpha := 0.5 if disable else 1.0
 	ID_QSAVE.modulate.a = alpha
 	ID_QSAVE.disabled = disable

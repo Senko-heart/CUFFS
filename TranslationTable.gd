@@ -9,6 +9,9 @@ var system_tbl: Dictionary[String, String] = {}
 
 func initialize() -> void:
 	load_options()
+	if Start.yahiro:
+		load_yahiro_table("mess", mess_tbl)
+		load_yahiro_table("choice", choice_tbl)
 	load_table("name", name_tbl)
 	load_table("mess", mess_tbl)
 	load_table("choice", choice_tbl)
@@ -40,8 +43,22 @@ func load_table_rows(filename: String, case_sensitive: bool = true) -> PackedStr
 	var string := bytes.get_string_from_utf8()
 	return string.split("\n", false)
 
+func load_custom_rows(arc: ZR, filename: String, case_sensitive: bool = true) -> PackedStringArray:
+	var src := "scenario".path_join(filename + ".tl")
+	var bytes: PackedByteArray
+	if arc.file_exists(src, case_sensitive):
+		bytes = arc.read_file(src, case_sensitive)
+	else: return []
+	var string := bytes.get_string_from_utf8()
+	return string.split("\n", false)
+
 func load_table(filename: String, tbl: Dictionary) -> void:
-	var rows := load_table_rows(filename)
+	put_rows_in_the_table(load_table_rows(filename), tbl)
+
+func load_yahiro_table(filename: String, tbl: Dictionary) -> void:
+	put_rows_in_the_table(load_custom_rows(FS.yahiro, filename), tbl)
+
+func put_rows_in_the_table(rows: PackedStringArray, tbl: Dictionary) -> void:
 	for row in rows:
 		var cols := row.split(";", true, 1)
 		if cols.size() != 2: continue

@@ -4,7 +4,7 @@ extends RefCounted
 var _arc := ZR.new()
 var _arc_name: StringName
 var _json := {}
-var _resource := {}
+var _rc := ResourceCache.new()
 var _style := {}
 var _frame: Dictionary[StringName, Dictionary] = {}
 var _material := ShaderMaterial.new()
@@ -28,7 +28,7 @@ func _init(arc: StringName) -> void:
 func _try_load(src: String, case_sensitive: bool = false) -> PackedByteArray:
 	var full_src := "full".path_join(src)
 	var patch_src := _arc_name.path_join(src)
-	if FS.decensor.file_exists(patch_src, case_sensitive):
+	if Start.decensor and FS.decensor.file_exists(patch_src, case_sensitive):
 		return FS.decensor.read_file(patch_src, case_sensitive)
 	if Start.full and FS.patch.file_exists(full_src, case_sensitive):
 		return FS.patch.read_file(full_src, case_sensitive)
@@ -51,11 +51,7 @@ func _load_resource(id: String, src: String) -> void:
 	if bytes.is_empty():
 		print(src)
 	match src.get_extension():
-		"png":
-			var img := Image.new()
-			img.load_png_from_buffer(bytes)
-			var tex := ImageTexture.create_from_image(img)
-			_resource[id] = tex
+		"png": _rc.load_simple_png(id, bytes)
 		_: push_error("unknown resource type " + src)
 
 func _bake_style(style: Dictionary) -> void:
@@ -76,32 +72,34 @@ func _bake_style(style: Dictionary) -> void:
 			_: obj[key] = val
 
 func _add_atlas(obj: Dictionary, key: StringName, val: Dictionary) -> void:
-	if val.image not in _resource:
+	var texture := _rc.get_texture(val.image)
+	if not texture:
 		push_error(val.image + " is not found")
 		return
 	var region := PackedInt32Array(val.get(&"region", []))
 	region.resize(4)
 	var tex := AtlasTexture.new()
-	tex.atlas = _resource[val.image]
+	tex.atlas = texture
 	tex.region = Rect2(region[0], region[1], region[2], region[3])
 	tex.filter_clip = true
 	obj[key] = tex
 	if &"column" not in val: return
 	key += "_column"
-	if val.column not in _resource:
+	texture = _rc.get_texture(val.column)
+	if not texture:
 		push_error(val.column + " is not found")
 		return
-	obj[key] = _resource[val.column]
+	obj[key] = texture
 
 func create_texture_rect(id: StringName) -> TextureRect:
 	var control := TextureRect.new()
-	control.texture = _resource[id]
+	control.texture = _rc.get_texture(id)
 	control.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_add_material(control)
 	return control
 
 func get_texture(id: StringName) -> Texture2D:
-	return _resource.get(id)
+	return _rc.get_texture(id)
 
 func _create_button(style: Dictionary) -> ModButton:
 	var btn := ModButton.new()
@@ -190,7 +188,7 @@ func create_form_page(frm_id: StringName) -> Control:
 	var frm := TextureRect.new()
 	if &"id" in frame: frm.name = frame.id
 	_add_material(frm)
-	if &"bg" in frame: frm.texture = _resource.get(frame.bg)
+	if &"bg" in frame: frm.texture = _rc.get_texture(frame.bg)
 	frm.size.x = frame.get(&"width", 0)
 	frm.size.y = frame.get(&"height", 0)
 	var btn_group: ButtonGroup
@@ -219,7 +217,7 @@ func create_form_page(frm_id: StringName) -> Control:
 					&"static_text": control = _create_static_text(ctrl, style)
 					_: continue
 		elif &"rsrc" in ctrl:
-			var res: Variant = _resource[ctrl.rsrc]
+			var res := _rc.wait(ctrl.rsrc)
 			if res is Texture2D:
 				control = TextureRect.new()
 				control.texture = res

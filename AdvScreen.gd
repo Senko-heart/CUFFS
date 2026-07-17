@@ -514,7 +514,7 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 				auto_timer = get_tree().create_timer(contemplation_time)
 		elif cid == "ID_QLOAD" \
 		or Input.is_action_just_pressed("quick_load"):
-			if not Global.is_recollect_mode() and Global.sc_obj_qsave:
+			if Global.is_saveable() and Global.sc_obj_qsave:
 				msg_frame.enable(false)
 				if await Global.confirm(Global.confirm_prompt.qload):
 					await Global.quick_load()
@@ -524,7 +524,7 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 				msg_frame.enable(true)
 		elif cid == "ID_QSAVE" \
 		or Input.is_action_just_pressed("quick_save"):
-			if not Global.is_recollect_mode():
+			if Global.is_saveable():
 				msg_frame.enable(false)
 				await Global.quick_save()
 				msg_frame.enable(true)
@@ -540,13 +540,13 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 			await call_history()
 		elif cid == "ID_LOAD" \
 		or Input.is_action_just_pressed("load", true):
-			if not Global.is_recollect_mode():
+			if Global.is_saveable():
 				ret = await call_load_save(true)
 				if ret != GameLogic.Unaffected:
 					break
 		elif cid == "ID_SAVE" \
 		or Input.is_action_just_pressed("save"):
-			if not Global.is_recollect_mode():
+			if Global.is_saveable():
 				ret = await call_load_save(false)
 				if ret != GameLogic.Unaffected:
 					break
@@ -680,7 +680,7 @@ func start_select() -> GameLogic:
 				msg_frame.hide_blink()
 		elif cid == "ID_QLOAD" \
 		or Input.is_action_just_pressed("quick_load"):
-			if not Global.is_recollect_mode() and Global.sc_obj_qsave:
+			if Global.is_saveable() and Global.sc_obj_qsave:
 				msg_frame.enable(false)
 				if await Global.confirm(Global.confirm_prompt.qload):
 					await Global.quick_load()
@@ -690,7 +690,7 @@ func start_select() -> GameLogic:
 				msg_frame.enable(true)
 		elif cid == "ID_QSAVE" \
 		or Input.is_action_just_pressed("quick_save"):
-			if not Global.is_recollect_mode():
+			if Global.is_saveable():
 				msg_frame.enable(false)
 				await Global.quick_save()
 				msg_frame.enable(true)
@@ -706,13 +706,13 @@ func start_select() -> GameLogic:
 			await call_history()
 		elif cid == "ID_LOAD" \
 		or Input.is_action_just_pressed("load", true):
-			if not Global.is_recollect_mode():
+			if Global.is_saveable():
 				ret = await call_load_save(true)
 				if ret != GameLogic.Unaffected:
 					break
 		elif cid == "ID_SAVE" \
 		or Input.is_action_just_pressed("save"):
-			if not Global.is_recollect_mode():
+			if Global.is_saveable():
 				ret = await call_load_save(false)
 				if ret != GameLogic.Unaffected:
 					break

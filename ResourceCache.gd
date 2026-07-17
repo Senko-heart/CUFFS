@@ -26,6 +26,14 @@ func is_put_on_load(key: String) -> bool:
 	mutex.unlock()
 	return ret
 
+func load_simple_png(key: String, bytes: PackedByteArray) -> void:
+	var task := func() -> void:
+		var image := Image.new()
+		image.load_png_from_buffer(bytes)
+		var texture: Texture2D = ImageTexture.create_from_image(image)
+		_write(key, texture)
+	tasks[key] = WorkerThreadPool.add_task(task, false, key)
+
 func load_png(key: String, bytes: PackedByteArray, is_hires: bool) -> void:
 	var task := func() -> void:
 		var frames: Array[Texture2D] = []

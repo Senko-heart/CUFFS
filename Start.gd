@@ -6,9 +6,11 @@ var translated := true
 var full := true
 var decensor := true
 var hires := true
+var yahiro := true
 
 var store_decensor := false
 var store_hires := false
+var store_yahiro := false
 
 const SECTION := "Start"
 
@@ -26,6 +28,7 @@ func load_from(cfg: ConfigFile) -> void:
 	_set_prop_by_type(cfg, &"full")
 	_set_prop_by_type(cfg, &"decensor")
 	_set_prop_by_type(cfg, &"hires")
+	_set_prop_by_type(cfg, &"yahiro")
 
 func dump_into(cfg: ConfigFile) -> void:
 	_get_prop(cfg, &"unlock_sora")
@@ -36,3 +39,5 @@ func dump_into(cfg: ConfigFile) -> void:
 		_get_prop(cfg, &"decensor")
 	if store_hires or not hires:
 		_get_prop(cfg, &"hires")
+	if store_yahiro or not yahiro:
+		_get_prop(cfg, &"yahiro")

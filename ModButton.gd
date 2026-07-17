@@ -19,6 +19,10 @@ var noninteractive: bool:
 				disabled = disabled_copy
 
 var disabled_copy := false
+var margin_top := 0.0
+var margin_left := 0.0
+var margin_bottom := 0.0
+var margin_right := 0.0
 
 func _init() -> void:
 	focus_mode = Control.FOCUS_ACCESSIBILITY
@@ -31,9 +35,13 @@ func _ready() -> void:
 func _get_minimum_size() -> Vector2:
 	return size
 
+func _has_point(point: Vector2) -> bool:
+	var extra_size := Vector2(margin_left + margin_right, margin_top + margin_bottom)
+	return Rect2(Vector2.ZERO, size - extra_size).has_point(point)
+
 func _apply_texture(tex: Texture2D) -> void:
 	size = tex.get_size()
-	draw_texture(tex, Vector2.ZERO)
+	draw_texture(tex, -Vector2(margin_left, margin_top))
 
 func _draw() -> void:
 	var _pressed := button_pressed and (not noninteractive or toggle_mode)

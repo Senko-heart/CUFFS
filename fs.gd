@@ -7,6 +7,7 @@ var sound := ZR.new()
 var patch := ZR.new()
 var decensor := ZR.new()
 var hires := ZR.new()
+var yahiro := ZR.new()
 
 var frame := ZR.new()
 var option := ZR.new()
@@ -51,6 +52,9 @@ func _open_archives() -> void:
 	if Start.hires:
 		hires.open(root + "hires.zip")
 		Start.store_hires = hires.is_open()
+	if Start.yahiro:
+		yahiro.open(root + "yahiro.zip")
+		Start.store_yahiro = yahiro.is_open()
 	
 	var system := root + "system"
 	frame.open(system.path_join("frame.zip"))
@@ -143,12 +147,17 @@ func load_voice(
 	snd: Sound,
 	case_sensitive: bool = false
 ) -> bool:
+	filename += ".ogg"
 	var bytes := _try_load_first(
 		[patch, voice],
-		filename + ".ogg",
+		filename,
 		case_sensitive
 	)
-	if bytes.is_empty(): return false
+	if bytes.is_empty():
+		if not Start.yahiro: return false
+		var yahiro_voice := "voice".path_join(filename)
+		bytes = yahiro.read_file(yahiro_voice, case_sensitive)
+		if bytes.is_empty(): return false
 	var stream := AudioStreamOggVorbis.load_from_buffer(bytes)
 	snd.stream = stream
 	snd.filename = filename
@@ -160,7 +169,8 @@ func exists_voice(
 ) -> bool:
 	filename += ".ogg"
 	return (patch.file_exists(filename, case_sensitive)
-	or voice.file_exists(filename, case_sensitive))
+	or voice.file_exists(filename, case_sensitive)
+	or Start.yahiro and yahiro.file_exists("voice".path_join(filename), case_sensitive))
 
 func load_sound(
 	filename: String,

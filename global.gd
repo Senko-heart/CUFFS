@@ -668,7 +668,7 @@ func title() -> GameAction:
 		spr_tg_menu = title_skin.create_form_page("ID_PAGE_MENU_TG")
 		spr_tg_menu.modulate.a = 0.0
 		spr_tg_menu.position = Vector2(313, 324)
-		spr_tg_menu.hide()
+		spr_tg_menu.visible = TECHGIAN
 		var tg: ModButton = spr_tg_menu.get_node("ID_TG")
 		tg.margin_left = 25
 		tg.margin_right = 26
@@ -680,6 +680,7 @@ func title() -> GameAction:
 		spr_menu = title_skin.create_form_page("ID_PAGE_MENU")
 	spr_menu.modulate.a = 0.0
 	spr_menu.position = Vector2(313, 324)
+	spr_menu.visible = not TECHGIAN
 	add_child(spr_menu)
 	var mspr_version := MessageSprite.new()
 	mspr_version.create_message(70, 20)
@@ -694,10 +695,15 @@ func title() -> GameAction:
 		"NO080002", "RH080002", "SR080002", "YH080002",
 	]
 	SoundSystem.play_sys_se(brand_call.pick_random())
-	Anim.fade(spr_menu, 1.0, 0.3)
-	Anim.fade(spr_logo, 1.0, 0.5)
-	if spr_sub_logo:
-		Anim.fade(spr_sub_logo, 1.0, 0.5)
+	if TECHGIAN:
+		Anim.fade(spr_tg_menu, 1.0, 0.3)
+		Anim.fade(spr_logo, 1.0, 0.5)
+		Anim.fade(spr_tg_logo, 1.0, 0.5)
+	else:
+		Anim.fade(spr_menu, 1.0, 0.3)
+		Anim.fade(spr_logo, 1.0, 0.5)
+		if spr_sub_logo:
+			Anim.fade(spr_sub_logo, 1.0, 0.5)
 	await Anim.fade(spr_base, 1.0, 0.5)
 	var ret := GameAction.Return
 	while true:

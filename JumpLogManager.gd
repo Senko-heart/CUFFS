@@ -36,8 +36,8 @@ func contiguous() -> Array[Dictionary]:
 		array[~i] = nth_back(i)
 	return array
 
-func from_contiguous(array: Array[Dictionary]) -> void:
+func from_contiguous(array: Array) -> void:
 	last = -1
 	total = 0
-	for dump in array:
+	for dump: Dictionary in array:
 		add(dump)

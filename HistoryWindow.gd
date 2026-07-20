@@ -2,11 +2,13 @@ class_name HistoryWindow
 extends Control
 
 const ScreenEffect := ConfigDataBase.ScreenEffect
+const GameLogic := Global.GameLogic
 
 var spr_frame: Control
 var spr_voice: Array[ModButton]
 var mspr_name: Array[MessageSprite]
 var mspr_message: Array[MessageSprite]
+var spr_jump: Array[ModButton]
 var index := 0
 var index_range := 0
 var page_pointer := 0
@@ -41,6 +43,17 @@ func _init(parent: Node) -> void:
 		mess.attach_message_style(Global.frame_skin, &"ID_FONT_MESSAGE")
 		add_child(mess)
 		mspr_message.append(mess)
+		var _jump := ModButton.new()
+		var texture: Texture2D = preload("res://FRM_0414.png")
+		for x in range(0, 164, 82):
+			var atlas_texture := AtlasTexture.new()
+			atlas_texture.atlas = texture
+			atlas_texture.region = Rect2(x, 0, 82, 25)
+			if x == 0: _jump.tex_normal = atlas_texture
+			else: _jump.tex_focus = atlas_texture
+		_jump.position = Vector2(701 - 19 - 82, 2 + i * 128)
+		add_child(_jump)
+		spr_jump.append(_jump)
 	index_range = Global.sc_obj.name_log.num() - 4
 	if index_range <= 0:
 		ID_SCROLL.hide()
@@ -79,7 +92,8 @@ func _hide() -> void:
 		Anim.kill(self)
 		modulate.a = 0.0
 
-func run() -> void:
+func run() -> GameLogic:
+	var ret := GameLogic.Unaffected
 	var play_voice := false
 	while true:
 		var control := await Global.poll_ui_event()
@@ -114,8 +128,15 @@ func run() -> void:
 		elif cid == "ID_VOICE4":
 			SoundSystem.play_voice(Global.sc_obj.voice_log.nth_back(page_pointer - 3), true)
 			play_voice = true
+		elif spr_jump.has(control):
+			var nth: int = control.get_meta(&"pointer")
+			if nth != 0:
+				await Global.sc_obj.jump_nth_back(nth)
+				ret = GameLogic.Load
+			break
 	if play_voice:
 		SoundSystem.stop_voice()
+	return ret
 
 func set_page(_index: int) -> void:
 	var num := Global.sc_obj.mess_log.num()
@@ -144,3 +165,8 @@ func set_page(_index: int) -> void:
 			spr_voice[i].position = (Vector2(4, 9)
 				+ mspr_name[i].position
 				+ mspr_name[i].cursor_pos())
+		if Global.sc_obj.jump_log.nth_back(page_pointer - i).is_empty():
+			spr_jump[i].hide()
+		else:
+			spr_jump[i].show()
+			spr_jump[i].set_meta(&"pointer", page_pointer - i)

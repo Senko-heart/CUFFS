@@ -427,6 +427,7 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 	if not Global.is_load():
 		Global.sc_obj.in_select = false
 		Global.sc_obj.hitret_id = id
+		Global.sc_obj.add_jump_log()
 	if Global.is_load():
 		if (Global.sc_obj.in_select
 		or Global.sc_obj.hitret_id != id):
@@ -537,7 +538,9 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 		elif cid == "ID_HISTORY" \
 		or Input.is_action_just_pressed("history") \
 		or Input.is_action_just_pressed("ui_up"):
-			await call_history()
+			ret = await call_history()
+			if ret != GameLogic.Unaffected:
+				break
 		elif cid == "ID_LOAD" \
 		or Input.is_action_just_pressed("load", true):
 			if Global.is_saveable():
@@ -703,7 +706,9 @@ func start_select() -> GameLogic:
 		elif cid == "ID_HISTORY" \
 		or Input.is_action_just_pressed("history") \
 		or Input.is_action_just_pressed("ui_up"):
-			await call_history()
+			ret = await call_history()
+			if ret != GameLogic.Unaffected:
+				break
 		elif cid == "ID_LOAD" \
 		or Input.is_action_just_pressed("load", true):
 			if Global.is_saveable():
@@ -797,9 +802,9 @@ func hide_select_item() -> void:
 			Anim.kill(item)
 			item.modulate.a = 0.0
 
-func call_history() -> void:
-	if Global.sc_obj.name_log.num() <= 1:
-		return
+func call_history() -> GameLogic:
+	if Global.sc_obj.name_log.num() < 1:
+		return GameLogic.Unaffected
 	if is_select():
 		transparency_select(0.0)
 	else:
@@ -807,7 +812,7 @@ func call_history() -> void:
 	var win := HistoryWindow.new(hud_layer)
 	win._show()
 	hide_message()
-	await win.run()
+	var ret := await win.run()
 	if is_select():
 		transparency_select(1.0)
 	else:
@@ -815,6 +820,7 @@ func call_history() -> void:
 	show_message()
 	await win._hide()
 	win.destroy()
+	return ret
 
 func call_load_save(is_load: bool) -> GameLogic:
 	msg_frame.enable(false)

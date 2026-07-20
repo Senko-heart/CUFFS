@@ -58,6 +58,9 @@ var title_skin: ControlPack
 var option_skin: ControlPack
 
 var sc_objects: Array[ScenarioObject] = []
+var sc_history: Array[Dictionary] = []
+var sc_history_diff: Array[Dictionary] = []
+var sc_history_end := 49
 var sc_obj_thumb_textures: Array[Texture2D] = []
 var sc_obj_qsave: ScenarioObject = null
 var confirm_prompt: Dictionary[StringName, String] = {
@@ -74,6 +77,8 @@ var confirm_prompt: Dictionary[StringName, String] = {
 
 func _init() -> void:
 	sc_objects.resize(SAVE_NUM)
+	sc_history.resize(50)
+	sc_history_diff.resize(50)
 	sc_obj_thumb_textures.resize(SAVE_NUM)
 	font_base[""] = font_base["MS Gothic"]
 
@@ -637,17 +642,19 @@ func logo() -> void:
 	Anim.destroy(spr_base)
 
 func title() -> GameAction:
+	sc_obj = ScenarioObject.new()
 	SoundSystem.play_bgm("BGM07")
-	var spr_base: Control = title_skin.create_texture_rect("ID_FRM_0611")
-	if Start.yahiro:
-		var base := ModButton.new()
-		base.name = "ID_SWITCH"
-		base.tex_normal = spr_base.texture
-		spr_base.free()
-		spr_base = base
+	var spr_base := title_skin.create_texture_rect("ID_FRM_0611")
 	spr_base.modulate.a = 0.0
 	add_child(spr_base)
-	var spr_logo := title_skin.create_texture_rect("ID_FRM_0612")
+	var spr_logo: Control = title_skin.create_texture_rect("ID_FRM_0612")
+	if Start.yahiro:
+		var btn := ModButton.new()
+		btn.name = "ID_SWITCH"
+		btn.tex_normal = spr_logo.texture
+		btn.material = spr_logo.material
+		spr_logo.free()
+		spr_logo = btn
 	spr_logo.modulate.a = 0.0
 	spr_logo.position = Vector2(223, 95)
 	add_child(spr_logo)
@@ -813,23 +820,7 @@ func save(filename: String, thumb: bool, id: int = -1) -> void:
 				thm.resize(dims.x, dims.y)
 			var texture := ImageTexture.create_from_image(thm)
 			sc_obj_thumb_textures[id] = texture
-	sc_obj.cg.load(adv.cg.dump())
-	sc_obj.cg_rgb = adv.set_cg_rgb
-	sc_obj.col_set_cg_rgb = adv.col_set_cg_rgb
-	sc_obj.bustup.clear()
-	for bu in adv.bustup_man.info:
-		var info := BustupInfo.new()
-		info.load(bu.dump())
-		sc_obj.bustup.append(info)
-	sc_obj.has_tone_filter = adv.is_tone_filter()
-	sc_obj.tone_filter = adv.get_tone_filter()
-	sc_obj.view_type = adv.get_message_view()
-	sc_obj.zoom = adv.is_zoom()
-	sc_obj.zoom_param = adv.get_zoom_param()
-	sc_obj.play_bgm = SoundSystem.get_play_bgm_name()
-	sc_obj.pause_bgm = SoundSystem.is_pause_bgm()
-	sc_obj.play_env_se = SoundSystem.get_play_env_se_list()
-	var data := sc_obj.dump()
+	var data := sc_obj.savedump()
 	if id in range(SAVE_NUM):
 		if not sc_objects[id]:
 			sc_objects[id] = ScenarioObject.new()

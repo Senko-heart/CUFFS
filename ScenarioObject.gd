@@ -32,6 +32,8 @@ var tone_filter := ""
 var zoom := false
 var zoom_param := ZoomParam.new()
 
+var jump_log := JumpLogManager.new(50)
+
 func _load_flag(
 	dict: Dictionary,
 	prop: StringName,
@@ -128,6 +130,12 @@ func load(dict: Dictionary) -> bool:
 			return false
 		zoom = true
 	else: zoom = false
+	
+	if &"jump_log" in dict:
+		jump_log.from_contiguous(dict.jump_log)
+	else:
+		jump_log.from_contiguous([])
+	
 	return true
 
 func dump() -> Dictionary:
@@ -148,15 +156,62 @@ func dump() -> Dictionary:
 			return bu.dump()),
 		play_bgm = play_bgm,
 		pause_bgm = pause_bgm,
-		play_env_se = play_env_se,
+		play_env_se = play_env_se.duplicate(),
 		hitret_id = hitret_id,
 		in_select = in_select,
-		select = select,
+		select = select.duplicate(),
 		view_type = view_type,
 		tone_filter = tone_filter,
 		zoom_param = zoom_param.dump(),
+		jump_log = jump_log.contiguous(),
 	}
 	if not cg_rgb: dict.erase(&"col_set_cg_rgb")
 	if not has_tone_filter: dict.erase(&"tone_filter")
 	if not zoom: dict.erase(&"zoom_param")
 	return dict
+
+func add_jump_log() -> void:
+	var dmp := savedump()
+	dmp.erase(&"unix_time")
+	dmp.erase(&"comment")
+	dmp.erase(&"name_log")
+	dmp.erase(&"mess_log")
+	dmp.erase(&"seq_log")
+	dmp.erase(&"voice_log")
+	dmp.erase(&"jump_log")
+	jump_log.add(dmp)
+
+func jump_nth_back(index: int) -> void:
+	for _log: LogManager in [name_log, mess_log, seq_log, voice_log]:
+		_log.erase_back(index)
+	jump_log.erase_back(index)
+	var dmp := jump_log.nth_back(0).merged({
+		unix_time = 0.0,
+		comment = "",
+		name_log = name_log.contiguous(),
+		mess_log = mess_log.contiguous(),
+		seq_log = seq_log.contiguous(),
+		voice_log = voice_log.contiguous(),
+		jump_log = jump_log.contiguous(),
+	})
+	self.load(dmp)
+	await Global.load(self)
+
+func savedump(adv: AdvScreen = Global.adv) -> Dictionary:
+	cg.load(adv.cg.dump())
+	cg_rgb = adv.set_cg_rgb
+	col_set_cg_rgb = adv.col_set_cg_rgb
+	bustup.clear()
+	for bu in adv.bustup_man.info:
+		var info := BustupInfo.new()
+		info.load(bu.dump())
+		bustup.append(info)
+	has_tone_filter = adv.is_tone_filter()
+	tone_filter = adv.get_tone_filter()
+	view_type = adv.get_message_view()
+	zoom = adv.is_zoom()
+	zoom_param = adv.get_zoom_param()
+	play_bgm = SoundSystem.get_play_bgm_name()
+	pause_bgm = SoundSystem.is_pause_bgm()
+	play_env_se = SoundSystem.get_play_env_se_list()
+	return dump()

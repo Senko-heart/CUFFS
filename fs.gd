@@ -286,6 +286,12 @@ func put_texture_on_load(
 		if full_pos.x <= pos.x:
 			pos = full_pos
 			filename = full_name
+	if Start.decensor:
+		var decensor_name := "decensor".path_join(filename)
+		var decensor_pos := _lookup_file([hires], decensor_name, exts, case_sensitive)
+		if decensor_pos.x <= pos.x:
+			pos = decensor_pos
+			filename = decensor_name
 	if pos == Vector2i.MAX:
 		return
 	var bytes := arcs[pos.x].read_file(filename + exts[pos.y], case_sensitive)

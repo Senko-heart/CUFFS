@@ -75,6 +75,8 @@ var confirm_prompt: Dictionary[StringName, String] = {
 	appreciation = "鑑賞に戻ります",
 }
 
+var FRM_0414: Texture2D
+
 func _init() -> void:
 	sc_objects.resize(SAVE_NUM)
 	sc_history.resize(50)
@@ -92,6 +94,12 @@ func _ready() -> void:
 	frame_skin = ControlPack.new(&"frame")
 	title_skin = ControlPack.new(&"title")
 	option_skin = ControlPack.new(&"option")
+	var bytes := Global.frame_skin._try_load("FRM_0414.png")
+	if not bytes.is_empty():
+		var image := Image.new()
+		image.load_png_from_buffer(bytes)
+		FRM_0414 = ImageTexture.create_from_image(image)
+	else: FRM_0414 = preload("res://FRM_0414.png")
 	var master := AudioServer.get_bus_index(&"Master")
 	AudioServer.set_bus_volume_linear(master, 0.75)
 	eye_catch.layer = Layer.EyeCatch

@@ -13,6 +13,12 @@ var index := 0
 var index_range := 0
 var page_pointer := 0
 
+var name_log := LogManager.new(Global.sc_obj.name_log.total << 1)
+var mess_log := LogManager.new(Global.sc_obj.mess_log.total << 1)
+var seq_log := LogManager.new(Global.sc_obj.seq_log.total << 1)
+var voice_log := LogManager.new(Global.sc_obj.voice_log.total << 1)
+var jump_log := LogManager.new(Global.sc_obj.jump_log.total << 1)
+
 var ID_SCROLL: ModScroll
 
 func _init(parent: Node) -> void:
@@ -44,7 +50,7 @@ func _init(parent: Node) -> void:
 		add_child(mess)
 		mspr_message.append(mess)
 		var _jump := ModButton.new()
-		var texture: Texture2D = preload("res://FRM_0414.png")
+		var texture: Texture2D = Global.FRM_0414
 		for x in range(0, 164, 82):
 			var atlas_texture := AtlasTexture.new()
 			atlas_texture.atlas = texture
@@ -54,7 +60,8 @@ func _init(parent: Node) -> void:
 		_jump.position = Vector2(701 - 19 - 82, 2 + i * 128)
 		add_child(_jump)
 		spr_jump.append(_jump)
-	index_range = Global.sc_obj.name_log.num() - 4
+	_init_logs()
+	index_range = name_log.num() - 4
 	if index_range <= 0:
 		ID_SCROLL.hide()
 		index_range = 0
@@ -63,6 +70,27 @@ func _init(parent: Node) -> void:
 		ID_SCROLL.value = index_range
 	set_page(index)
 	parent.add_child(self)
+
+func _init_logs() -> void:
+	var name_cont := Global.sc_obj.name_log.contiguous()
+	var mess_cont := Global.sc_obj.mess_log.contiguous()
+	var seq_cont := Global.sc_obj.seq_log.contiguous()
+	var voice_cont := Global.sc_obj.voice_log.contiguous()
+	var jump_total := Global.sc_obj.jump_log.total
+	for i in range(mess_cont.size()):
+		var multimess := TranslationTable.mess(mess_cont[i].to_int())
+		var firstmess := true
+		for mess in Global.adjust_message(multimess):
+			name_log.add(name_cont[i])
+			mess_log.add(mess)
+			seq_log.add(seq_cont[i])
+			if firstmess:
+				voice_log.add(voice_cont[i])
+				jump_log.add(str(jump_total + ~i))
+				firstmess = false
+			else:
+				voice_log.add("")
+				jump_log.add("")
 
 func _ready() -> void:
 	ID_SCROLL.enable_container_mode()
@@ -117,16 +145,16 @@ func run() -> GameLogic:
 				ID_SCROLL.value = index_range - index
 				set_page(index)
 		elif cid == "ID_VOICE1":
-			SoundSystem.play_voice(Global.sc_obj.voice_log.nth_back(page_pointer - 0), true)
+			SoundSystem.play_voice(voice_log.nth_back(page_pointer - 0), true)
 			play_voice = true
 		elif cid == "ID_VOICE2":
-			SoundSystem.play_voice(Global.sc_obj.voice_log.nth_back(page_pointer - 1), true)
+			SoundSystem.play_voice(voice_log.nth_back(page_pointer - 1), true)
 			play_voice = true
 		elif cid == "ID_VOICE3":
-			SoundSystem.play_voice(Global.sc_obj.voice_log.nth_back(page_pointer - 2), true)
+			SoundSystem.play_voice(voice_log.nth_back(page_pointer - 2), true)
 			play_voice = true
 		elif cid == "ID_VOICE4":
-			SoundSystem.play_voice(Global.sc_obj.voice_log.nth_back(page_pointer - 3), true)
+			SoundSystem.play_voice(voice_log.nth_back(page_pointer - 3), true)
 			play_voice = true
 		elif spr_jump.has(control):
 			var nth: int = control.get_meta(&"pointer")
@@ -139,34 +167,34 @@ func run() -> GameLogic:
 	return ret
 
 func set_page(_index: int) -> void:
-	var num := Global.sc_obj.mess_log.num()
+	var num := mess_log.num()
 	if index_range == 0:
 		page_pointer = num - 1
 	else:
 		page_pointer = 4 + _index - 1
 	for i in range(4):
 		mspr_message[i].clear()
-		var seq := Global.sc_obj.seq_log.nth_back(page_pointer - i)
+		var seq := seq_log.nth_back(page_pointer - i)
 		if not seq.is_empty():
 			mspr_message[i].apply_sequence(JSON.parse_string(seq))
-		var message := Global.sc_obj.mess_log.nth_back(page_pointer - i)
-		if not message.is_empty():
-			var mess := TranslationTable.mess(message.to_int())
+		var mess := mess_log.nth_back(page_pointer - i)
+		if not mess.is_empty():
 			mspr_message[i].output_message(mess)
 	for i in range(4):
-		var alias_name := Global.sc_obj.name_log.nth_back(page_pointer - i)
+		var alias_name := name_log.nth_back(page_pointer - i)
 		var show_name: String = Global.check_true_name(alias_name).show_name
 		mspr_name[i].output_message(show_name)
 		await mspr_name[i].finished
-		if Global.sc_obj.voice_log.nth_back(page_pointer - i).is_empty():
+		if voice_log.nth_back(page_pointer - i).is_empty():
 			spr_voice[i].hide()
 		else:
 			spr_voice[i].show()
 			spr_voice[i].position = (Vector2(4, 9)
 				+ mspr_name[i].position
 				+ mspr_name[i].cursor_pos())
-		if Global.sc_obj.jump_log.nth_back(page_pointer - i).is_empty():
+		var jump_ptr := jump_log.nth_back(page_pointer - i)
+		if jump_ptr.is_empty():
 			spr_jump[i].hide()
 		else:
 			spr_jump[i].show()
-			spr_jump[i].set_meta(&"pointer", page_pointer - i)
+			spr_jump[i].set_meta(&"pointer", int(jump_ptr))

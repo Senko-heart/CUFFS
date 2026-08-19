@@ -196,7 +196,7 @@ func set_page(_index: int) -> void:
 				+ mspr_name[i].position
 				+ mspr_name[i].cursor_pos())
 		var jump_ptr := jump_log.nth_back(page_pointer - i)
-		if jump_ptr.is_empty():
+		if not Start.jump_log or jump_ptr.is_empty():
 			spr_jump[i].hide()
 		else:
 			spr_jump[i].show()

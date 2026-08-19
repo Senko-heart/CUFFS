@@ -2,6 +2,7 @@ extends Node
 
 var unlock_sora := true
 var day_night_cycle := true
+var jump_log := true
 var translated := true
 var full := true
 var decensor := true
@@ -24,6 +25,7 @@ func _set_prop_by_type(cfg: ConfigFile, prop: StringName) -> void:
 func load_from(cfg: ConfigFile) -> void:
 	_set_prop_by_type(cfg, &"unlock_sora")
 	_set_prop_by_type(cfg, &"day_night_cycle")
+	_set_prop_by_type(cfg, &"jump_log")
 	_set_prop_by_type(cfg, &"translated")
 	_set_prop_by_type(cfg, &"full")
 	_set_prop_by_type(cfg, &"decensor")
@@ -33,6 +35,7 @@ func load_from(cfg: ConfigFile) -> void:
 func dump_into(cfg: ConfigFile) -> void:
 	_get_prop(cfg, &"unlock_sora")
 	_get_prop(cfg, &"day_night_cycle")
+	_get_prop(cfg, &"jump_log")
 	_get_prop(cfg, &"translated")
 	_get_prop(cfg, &"full")
 	if store_decensor or not decensor:

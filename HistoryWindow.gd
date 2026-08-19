@@ -17,7 +17,7 @@ var name_log := LogManager.new(Global.sc_obj.name_log.total << 1)
 var mess_log := LogManager.new(Global.sc_obj.mess_log.total << 1)
 var seq_log := LogManager.new(Global.sc_obj.seq_log.total << 1)
 var voice_log := LogManager.new(Global.sc_obj.voice_log.total << 1)
-var jump_log := LogManager.new(Global.sc_obj.jump_log.total << 1)
+var jump_log := LogManager.new(Global.sc_obj.jump_log.logs.size() << 1)
 
 var ID_SCROLL: ModScroll
 
@@ -76,17 +76,20 @@ func _init_logs() -> void:
 	var mess_cont := Global.sc_obj.mess_log.contiguous()
 	var seq_cont := Global.sc_obj.seq_log.contiguous()
 	var voice_cont := Global.sc_obj.voice_log.contiguous()
-	var jump_total := Global.sc_obj.jump_log.total
-	for i in range(mess_cont.size()):
+	var mess_total := mess_cont.size()
+	for i in range(mess_total):
 		var multimess := TranslationTable.mess(mess_cont[i].to_int())
 		var firstmess := true
+		var n := mess_total + ~i
 		for mess in Global.adjust_message(multimess):
 			name_log.add(name_cont[i])
 			mess_log.add(mess)
 			seq_log.add(seq_cont[i])
 			if firstmess:
 				voice_log.add(voice_cont[i])
-				jump_log.add(str(jump_total + ~i))
+				if Global.sc_obj.jump_log.nth_back(n).is_empty():
+					jump_log.add("")
+				else: jump_log.add(str(n))
 				firstmess = false
 			else:
 				voice_log.add("")

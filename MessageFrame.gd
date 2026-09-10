@@ -43,7 +43,7 @@ func _init() -> void:
 	spr_voice.position = Vector2(689, 6)
 	spr_voice.modulate.a = 0.0
 	spr_voice.show()
-	mspr_name.create_message(320, 36)
+	mspr_name.create_message(640, 36)
 	mspr_name.attach_message_style(Global.frame_skin, &"ID_FONT_NAME")
 	mspr_name.position = Vector2(27, 5)
 	mspr_name.add_theme_constant_override(&"outline_size", 4)

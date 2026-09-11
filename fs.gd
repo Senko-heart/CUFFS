@@ -89,6 +89,7 @@ var COLUMN_DISPLAY_NAME: String
 var MIME_TYPE_DIR: String
 var COLUMNS: PackedStringArray
 
+var dir_id: Dictionary[String, String] = {}
 var fast_path: Dictionary[String, String] = {}
 
 func _init_jni() -> void:
@@ -115,6 +116,9 @@ func _init_fast_path(uri: String) -> void:
 	var tree_uri: JavaObject = Uri.parse(uri)
 	var document_id: String = DocumentsContract.getTreeDocumentId(tree_uri)
 	_scan_directory(tree_uri, document_id, uri + "#", fast_path)
+	var savepath := uri + "#save"
+	if savepath in dir_id:
+		_scan_directory(tree_uri, dir_id[savepath], savepath + "/", fast_path)
 
 func _scan_directory(
 	tree_uri: JavaObject,
@@ -132,7 +136,7 @@ func _scan_directory(
 		var display_name: String = cursor.getString(2)
 		var path := parent_path + display_name
 		if mime_type == MIME_TYPE_DIR:
-			_scan_directory(tree_uri, file_id, path + "/", output)
+			dir_id[path] = file_id
 		else:
 			var file_uri: JavaObject = DocumentsContract.buildDocumentUriUsingTree(tree_uri, file_id)
 			var file_path: String = file_uri.toString()
@@ -382,6 +386,8 @@ func load_mask_texture(
 
 func load_save_bytes(filename: String) -> PackedByteArray:
 	var path := save_dir.path_join(filename)
+	if not fast_path.is_empty() and path not in fast_path:
+		return PackedByteArray()
 	return FileAccess.get_file_as_bytes(faster_path(path))
 
 func open_save_file(path: String) -> FileAccess:

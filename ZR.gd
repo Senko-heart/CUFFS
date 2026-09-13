@@ -19,7 +19,7 @@ func is_open() -> bool:
 
 func open(path: String) -> void:
 	close()
-	file = FileAccess.open(path, FileAccess.READ)
+	file = FS.open_read(path)
 	if _build_file_map():
 		file = null
 

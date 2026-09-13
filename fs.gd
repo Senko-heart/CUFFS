@@ -22,7 +22,7 @@ var rc := ResourceCache.new()
 
 var trash_os := OS.get_name() == "Android"
 
-func _init() -> void:
+func _ready() -> void:
 	_init_jni()
 	if trash_os and not _load_uri():
 		var err := DisplayServer.file_dialog_show(
@@ -36,32 +36,32 @@ func _init() -> void:
 	else: _open_archives()
 
 func _open_archives() -> void:
-	var start_bytes := FileAccess.get_file_as_bytes(faster_path(root + "start.cfg"))
+	var start_bytes := get_file_as_bytes(root + "start.cfg")
 	var start_text := start_bytes.get_string_from_utf8()
 	var cfg := ConfigFile.new()
 	if not start_bytes.is_empty() and not cfg.parse(start_text):
 		Start.load_from(cfg)
 	
-	data1.open(faster_path(root + "data1.zip"))
-	data2.open(faster_path(root + "data2.zip"))
-	voice.open(faster_path(root + "voice.zip"))
-	sound.open(faster_path(root + "sound.zip"))
-	patch.open(faster_path(root + "patch.zip"))
+	data1.open(root + "data1.zip")
+	data2.open(root + "data2.zip")
+	voice.open(root + "voice.zip")
+	sound.open(root + "sound.zip")
+	patch.open(root + "patch.zip")
 	if Start.decensor:
-		decensor.open(faster_path(root + "decensor.zip"))
+		decensor.open(root + "decensor.zip")
 		Start.store_decensor = decensor.is_open()
 	if Start.hires:
-		hires.open(faster_path(root + "hires.zip"))
+		hires.open(root + "hires.zip")
 		Start.store_hires = hires.is_open()
 	if Start.yahiro:
-		yahiro.open(faster_path(root + "yahiro.zip"))
+		yahiro.open(root + "yahiro.zip")
 		Start.store_yahiro = yahiro.is_open()
 	
 	var system := root + "system"
-	frame.open(faster_path(system.path_join("frame.zip")))
-	option.open(faster_path(system.path_join("option.zip")))
-	title.open(faster_path(system.path_join("title.zip")))
-	scenario.open(faster_path(system.path_join("scenario.zip")))
+	frame.open(system.path_join("frame.zip"))
+	option.open(system.path_join("option.zip"))
+	title.open(system.path_join("title.zip"))
+	scenario.open(system.path_join("scenario.zip"))
 	
 	save_dir = root + "save"
 	if not trash_os:
@@ -69,7 +69,7 @@ func _open_archives() -> void:
 		dir.make_dir("save")
 	
 	Start.dump_into(cfg)
-	var start_cfg := FileAccess.open(faster_path(root + "start.cfg"), FileAccess.WRITE)
+	var start_cfg := open_write(root + "start.cfg")
 	if start_cfg != null:
 		start_cfg.store_string(cfg.encode_to_text())
 	
@@ -170,6 +170,40 @@ func sync() -> void:
 
 func faster_path(path: String) -> String:
 	return fast_path.get(path, path)
+
+func open_read(path: String) -> FileAccess:
+	return FileAccess.open(faster_path(path), FileAccess.READ)
+
+func get_file_as_bytes(path: String) -> PackedByteArray:
+	return FileAccess.get_file_as_bytes(faster_path(path))
+
+func open_write(path: String) -> FileAccess:
+	if not art or not path.begins_with(root):
+		return FileAccess.open(path, FileAccess.WRITE)
+	if path in fast_path:
+		return FileAccess.open(fast_path[path], FileAccess.WRITE)
+	var rindex := maxi(path.rfind("/"), root.length() - 1)
+	if rindex == path.length() - 1:
+		return null
+	var path_parent := path.left(rindex)
+	var filename := path.right(~rindex)
+	var tree_uri: JavaObject = Uri.parse(root.trim_suffix("#"))
+	var parent_id: String
+	if rindex < root.length():
+		parent_id = DocumentsContract.getTreeDocumentId(tree_uri)
+	elif path_parent in dir_id:
+		parent_id = dir_id[path_parent]
+	else:
+		return null
+	var parent_uri: JavaObject = DocumentsContract.buildDocumentUriUsingTree(
+		tree_uri, parent_id)
+	var created_uri: JavaObject = DocumentsContract.createDocument(
+		resolver, parent_uri, "application/octet-stream", filename)
+	if created_uri == null:
+		return null
+	var uri_string: String = created_uri.toString()
+	fast_path[path] = uri_string
+	return FileAccess.open(uri_string, FileAccess.WRITE)
 
 func measure_png(bytes: PackedByteArray, begin: int = 0) -> int:
 	begin += 8
@@ -388,14 +422,14 @@ func load_save_bytes(filename: String) -> PackedByteArray:
 	var path := save_dir.path_join(filename)
 	if not fast_path.is_empty() and path not in fast_path:
 		return PackedByteArray()
-	return FileAccess.get_file_as_bytes(faster_path(path))
+	return get_file_as_bytes(path)
 
 func open_save_file(path: String) -> FileAccess:
 	if not trash_os:
 		var dir := DirAccess.open(save_dir)
 		dir.make_dir_recursive(path.get_base_dir())
 	path = save_dir.path_join(path)
-	return FileAccess.open(faster_path(path), FileAccess.WRITE)
+	return open_write(path)
 
 func cache_reset(hint: String) -> bool:
 	return rc.clear(hint)

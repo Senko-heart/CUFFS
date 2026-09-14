@@ -13,6 +13,7 @@ wav2qoa/*.wav
 *.exe
 *.pck
 start.cfg
+font.cfg
 *.apk
 *.apk.idsig
 release.keystore

@@ -82,7 +82,6 @@ func _init() -> void:
 	sc_history.resize(50)
 	sc_history_diff.resize(50)
 	sc_obj_thumb_textures.resize(SAVE_NUM)
-	font_base[""] = font_base["MS Gothic"]
 
 func _ready() -> void:
 	await FS.sync()
@@ -171,38 +170,6 @@ func poll_ui_event() -> Control:
 	scrolled = null
 	await get_tree().process_frame
 	return ui_event_control
-
-var font_base: Dictionary[String, Dictionary] = {
-	"MS Gothic": {
-		font = preload("res://msgothic.ttc")
-	},
-	"MS Mincho": {
-		font = preload("res://msmincho.ttc")
-	}
-}
-
-var font_variations: Dictionary[StringName, Array] = {}
-
-func get_font_variation(
-	face: String,
-	bold: bool,
-	italic: bool
-) -> FontVariation:
-	if face not in font_base: return null
-	if face not in font_variations:
-		font_variations[face] = []
-		font_variations[face].resize(4)
-	var fontvars := font_variations[face]
-	var varidx := int(bold) + (int(italic) << 1)
-	if fontvars[varidx]: return fontvars[varidx]
-	var fontbase := font_base[face]
-	var fv := FontVariation.new()
-	fv.base_font = fontbase.font
-	if bold: fv.variation_embolden = fontbase.get(&"embolden", 0.4)
-	if italic: fv.variation_transform.y.x = fontbase.get(&"faux_slant", 0.2)
-	fv.variation_face_index = fontbase.get(&"face_index", 0)
-	fontvars[varidx] = fv
-	return fv
 
 func set_volume(vol: float) -> void:
 	var master := AudioServer.get_bus_index(&"Master")

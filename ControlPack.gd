@@ -146,6 +146,7 @@ func attach_text_style(label: MessageSprite, style_id: StringName) -> void:
 	if style_id not in _style:
 		return
 	var style: Dictionary = _style[style_id]
+	label.style = style_id
 	if &"arrange" in style:
 		var arrange: Dictionary = style.arrange
 		if &"align" in arrange:

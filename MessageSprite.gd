@@ -14,6 +14,7 @@ extends RichTextLabel
 @export var use_italics := false
 @export var face := ""
 @export var font_size := 0
+@export var style := &""
 
 var message_ended := false
 
@@ -32,7 +33,7 @@ func reset_tag_stack() -> void:
 	message_ended = false
 	if nvl_effect:
 		push_customfx(NovelEffect.new(self), {})
-	var fv := Global.get_font_variation(face, use_bold, use_italics)
+	var fv := FontOverride.get_font_variation(style, face, use_bold, use_italics)
 	if fv: push_font(fv, font_size)
 	elif font_size != 0: push_font_size(font_size)
 	add_text(message.replace(".", "․"))

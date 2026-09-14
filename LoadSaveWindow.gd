@@ -52,17 +52,12 @@ func _init(parent: Node, load_: bool) -> void:
 		thumb_base.add_child(thumb)
 		spr_thumb.append(thumb)
 		spr_thumb_base.append(thumb_base)
-	for child in spr_frame.get_children():
-		if child != ID_SCROLL: child.reparent(ID_SCROLL)
 	add_child(spr_frame)
 	for thumb_base in spr_thumb_base: spr_frame.add_child(thumb_base)
 	spr_frame.pivot_offset = 0.5 * spr_frame.size
 	spr_frame.position = 0.5 * (Vector2(Global.screen_size) - spr_frame.size)
 	set_page((Global.sys_obj.new_bookmark_index - 1) / 3 - 1)
 	parent.add_child(self)
-
-func _ready() -> void:
-	ID_SCROLL.enable_container_mode()
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_up", true):

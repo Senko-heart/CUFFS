@@ -95,9 +95,6 @@ func _init_logs() -> void:
 				voice_log.add("")
 				jump_log.add("")
 
-func _ready() -> void:
-	ID_SCROLL.enable_container_mode()
-
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_up", true):
 		Input.action_release("ui_up")

@@ -104,13 +104,16 @@ func get_texture(id: StringName) -> Texture2D:
 func _create_button(style: Dictionary) -> ModButton:
 	var btn := ModButton.new()
 	btn.name = style.id
+	_init_button(btn, style)
+	return btn
+
+func _init_button(btn: ModButton, style: Dictionary) -> void:
 	if &"normal" in style: btn.tex_normal = style.normal
 	if &"pushed" in style: btn.tex_pushed = style.pushed
 	if &"focus" in style: btn.tex_focus = style.focus
 	if &"pushed_focus" in style: btn.tex_pushed_focus = style.pushed_focus
 	if &"disabled" in style: btn.tex_disabled = style.disabled
 	if &"push_disabled" in style: btn.tex_push_disabled = style.push_disabled
-	return btn
 
 func _create_radio(style: Dictionary, btn_group: ButtonGroup) -> ModButton:
 	var btn := _create_button(style)
@@ -131,9 +134,9 @@ func _create_scroll(style: Dictionary, vertical: bool = false) -> ModScroll:
 	scroll.grabber.tex_focus = style.get(&"focus")
 	scroll.grabber.tex_pushed = style.get(&"tracking")
 	if &"up_button" in style:
-		scroll.up_button = _create_button(_style[style.up_button.style])
+		_init_button(scroll.up_button, _style[style.up_button.style])
 	if &"down_button" in style:
-		scroll.down_button = _create_button(_style[style.down_button.style])
+		_init_button(scroll.down_button, _style[style.down_button.style])
 	return scroll
 
 func _create_static_text(ctrl: Dictionary, style: Dictionary) -> MessageSprite:

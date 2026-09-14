@@ -390,7 +390,17 @@ func show_cg_loop(char_id: int, id: int) -> void:
 	while true:
 		var control := await Global.poll_ui_event()
 		var cid := control.name if control else &""
-		if Input.is_action_just_pressed("ui_up"):
+		if cid == &"ID_SCROLL":
+			scroll_t = id_scroll.ratio
+			var info := cg_view_man[id].thumb_info[index]
+			var a := info.pt_cg1
+			var b := info.pt_cg2
+			var d := (b - a) / 3.0
+			var pt := a.bezier_interpolate(a + d, b - d, b, scroll_t)
+			Global.adv.spr_cg.position = -pt
+		elif cid == &"ID_CLOSE" or Input.is_action_just_pressed("hide_adv"):
+			spr_scroll.hide()
+		elif Input.is_action_just_pressed("ui_up"):
 			id -= 1
 			index = -1
 			if id < 0:
@@ -441,16 +451,6 @@ func show_cg_loop(char_id: int, id: int) -> void:
 				if Global.check_cg_flag(cg_view_man[id].thumb_info[index].flag):
 					break
 			await show_cg(cg_view_man[id].thumb_info[index])
-		elif cid == &"ID_CLOSE" or Input.is_action_just_pressed("hide_adv"):
-			spr_scroll.hide()
-		elif cid == &"ID_SCROLL":
-			scroll_t = id_scroll.ratio
-			var info := cg_view_man[id].thumb_info[index]
-			var a := info.pt_cg1
-			var b := info.pt_cg2
-			var d := (b - a) / 3.0
-			var pt := a.bezier_interpolate(a + d, b - d, b, scroll_t)
-			Global.adv.spr_cg.position = -pt
 		elif Input.is_action_just_pressed("ui_left") and scroll:
 			id_scroll.value -= 10
 			scroll_t = id_scroll.ratio
@@ -491,9 +491,10 @@ func show_cg(info: CgViewInfo, flush: bool = false) -> void:
 		Anim.fade(spr_scroll, 1.0, 0.0)
 	else:
 		spr_scroll.hide()
-	var id_scroll: ModScroll = spr_scroll.get_node("ID_SCROLL")
-	id_scroll.value = 0.0
-	scroll_t = 0.0
+	if scroll:
+		var id_scroll: ModScroll = spr_scroll.get_node("ID_SCROLL")
+		id_scroll.value = 0.0
+		scroll_t = 0.0
 	Global.adv.set_cg_(info.cg_file, int(info.pt_cg1.x), int(info.pt_cg1.y))
 	for bu in info.bu_list:
 		Global.adv.set_bustup_(bu.file, bu.pos, bu.priority)

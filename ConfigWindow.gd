@@ -41,8 +41,6 @@ func _init(parent: Node, from_title: bool) -> void:
 	add_child(spr_base)
 	for child in spr_base.get_children():
 		set(child.name, child)
-		if child is ModScroll:
-			child.position.x += 8
 	for id_vol: ModScroll in [ID_VOL_BGM, ID_VOL_SE, ID_VOL_SYSTEM, ID_VOL_VOICE]:
 		id_vol.max_value = 256
 		id_vol.wheel_step = 4

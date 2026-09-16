@@ -7,6 +7,7 @@ var sound := ZR.new()
 var patch := ZR.new()
 var decensor := ZR.new()
 var hires := ZR.new()
+var soundmod := ZR.new()
 var yahiro := ZR.new()
 
 var frame := ZR.new()
@@ -19,6 +20,8 @@ var save_dir: String
 var _arcs_loaded := false
 
 var rc := ResourceCache.new()
+
+var soundmod_cfg: Dictionary[String, Vector2i] = {}
 
 var trash_os := OS.get_name() == "Android"
 
@@ -53,6 +56,19 @@ func _open_archives() -> void:
 	if Start.hires:
 		hires.open(root + "hires.zip")
 		Start.store_hires = hires.is_open()
+	if Start.soundmod:
+		soundmod.open(root + "soundmod.zip")
+		Start.store_soundmod = soundmod.is_open()
+		var sm_cfg := ConfigFile.new()
+		var sm_cfg_text := soundmod.read_file("sound.cfg").get_string_from_utf8()
+		if sm_cfg.parse(sm_cfg_text) == OK:
+			for filename in sm_cfg.get_sections():
+				var a: Variant = sm_cfg.get_value(filename, "a")
+				var b: Variant = sm_cfg.get_value(filename, "b")
+				soundmod_cfg[filename] = Vector2i(
+					a if a is int else 0,
+					b if b is int else 0,
+				)
 	if Start.yahiro:
 		yahiro.open(root + "yahiro.zip")
 		Start.store_yahiro = yahiro.is_open()
@@ -306,7 +322,18 @@ func load_bgm(
 	var lq := filename + ".qoa"
 	var bytes: PackedByteArray
 	var is_qoa := false
-	if patch.file_exists(hq, case_sensitive):
+	var filename_upper := filename.to_upper()
+	if filename_upper in soundmod_cfg:
+		if soundmod.file_exists(hq, case_sensitive):
+			bytes = soundmod.read_file(hq, case_sensitive)
+		elif soundmod.file_exists(lq, case_sensitive):
+			bytes = soundmod.read_file(lq, case_sensitive)
+			is_qoa = true
+		else: return false
+		var value := soundmod_cfg[filename_upper]
+		bgm.rewind_pos = value.x
+		bgm.end_pos = value.y
+	elif patch.file_exists(hq, case_sensitive):
 		bytes = patch.read_file(hq, case_sensitive)
 	elif patch.file_exists(lq, case_sensitive):
 		bytes = patch.read_file(lq, case_sensitive)

@@ -410,7 +410,7 @@ func put_texture_on_load(
 	case_sensitive: bool = false
 ) -> void:
 	var key := filename if case_sensitive else filename.to_upper()
-	var arcs: Array[ZR] = [hires, decensor, patch, data1, data2]
+	var arcs: Array[ZR] = [hires, decensor, patch, data1, data2, yahiro]
 	var exts: PackedStringArray = [".png", ".jpg", ".webp"]
 	var pos := _lookup_file(arcs, filename, exts, case_sensitive)
 	if Start.full:

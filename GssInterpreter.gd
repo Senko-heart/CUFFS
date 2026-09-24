@@ -225,6 +225,8 @@ func step() -> StepResult:
 		shake.callv(reshape(args, 0))
 	elif fn == &"Update":
 		await update.callv(reshape(args, 0))
+	elif fn == &"EnableKeyUpdateFlush":
+		enable_key_update_flush.callv(reshape(args, -1))
 	elif fn == &"Show":
 		await show.callv(reshape(args, 0))
 	elif fn == &"Hide":
@@ -475,6 +477,9 @@ func update(flush: int) -> void:
 	var _flush := flush != 0 or Global.adv.is_key_update_flush()
 	await Global.adv.update_(_flush)
 	await Global.adv.wait_update(_flush)
+
+func enable_key_update_flush(enable: int) -> void:
+	Global.adv.enable_key_update_flush(enable != 0)
 
 func show(wait: int) -> void:
 	if Global.is_load():

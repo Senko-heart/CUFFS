@@ -6,6 +6,17 @@ var cache: Dictionary[String, Resource] = {}
 var tasks: Dictionary[String, int] = {}
 var mutex: Mutex = Mutex.new()
 
+static var _free_list: Array[ResourceCache] = []
+
+func _init() -> void:
+	_free_list.append(self)
+
+static func free_all() -> void:
+	for it in _free_list:
+		it.wait_all()
+		it.cache.clear()
+	_free_list.clear()
+
 func clear(hint: String) -> bool:
 	if cache_hint != hint:
 		wait_all()

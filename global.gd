@@ -444,6 +444,7 @@ func ask_game_exit() -> void:
 func save_and_quit() -> void:
 	save_system_data()
 	save_config_data()
+	ResourceCache.free_all()
 	get_tree().quit()
 
 func on_flag(i: int) -> void:

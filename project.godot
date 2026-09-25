@@ -15,7 +15,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="ヨスガノソラ"
-config/version="1.00"
+config/version="1.01"
 run/main_scene="uid://soibbmkveucu"
 config/auto_accept_quit=false
 config/quit_on_go_back=false

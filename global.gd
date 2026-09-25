@@ -668,7 +668,7 @@ func title() -> GameAction:
 	mspr_version.create_message(70, 20)
 	mspr_version.attach_message_style(title_skin, "ID_FONT_VERSION")
 	mspr_version.position = Vector2(screen_size) - mspr_version.size
-	mspr_version.output_message("Ver 1.00")
+	mspr_version.output_message("Ver 1.01")
 	mspr_version.modulate.a = 0.0
 	add_child(mspr_version)
 	Anim.fade(mspr_version, 1.0, 0.5)

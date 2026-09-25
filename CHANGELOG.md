@@ -4,7 +4,7 @@
 
 ### Added
 
-- Support loading PNG and WebP images
+- Support loading JPG and WebP images
 - Tech Gian's limited edition trial with the exclusive Yahiro mini-route
 - Ability to jump back to a previous message from the history log
 - Partial auto text carrying over multiple messages when there is too many lines

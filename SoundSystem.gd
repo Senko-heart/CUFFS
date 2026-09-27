@@ -10,14 +10,16 @@ var voice := Sound.new(self)
 func _init() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
-func _stop_signal(snd: Sound, key_disable: bool = false) -> void:
+func _stop_signal(snd: Sound, key_disable: bool = false) -> bool:
 	if key_disable:
 		if snd.playing:
 			await snd.finished
-		return
+		return false
 	while snd.playing:
-		if Input.is_action_just_pressed("hit", true): break
+		if Input.is_action_just_pressed("hit", true):
+			return true
 		await get_tree().process_frame
+	return false
 
 func play_bgm(file: String, non_fade: bool = false) -> void:
 	file = file.to_upper()
@@ -234,6 +236,9 @@ func play_sys_se(file: String) -> void:
 func stop_sys_se() -> void:
 	sys_se.stream = null
 
+func wait_sys_se(key_disable: bool = false) -> bool:
+	return await _stop_signal(sys_se, key_disable)
+
 func set_sys_se_volume(vol: float) -> void:
 	Global.cnf_obj.vol_sys_se = vol
 
@@ -251,8 +256,8 @@ func play_voice(file: String, force: bool = false) -> bool:
 func stop_voice() -> void:
 	voice.stream = null
 
-func wait_voice(key_disable: bool = false) -> void:
-	await _stop_signal(voice, key_disable)
+func wait_voice(key_disable: bool = false) -> bool:
+	return await _stop_signal(voice, key_disable)
 
 func is_play_voice() -> bool:
 	return voice.playing

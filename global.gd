@@ -22,7 +22,27 @@ enum GameAction {
 	Appreciation = 3,
 	Logo = 5,
 	Title = 6,
-	TechGian = 101,
+	TitleTop = 6,
+	TitleShortScenario = 7,
+	TitleWeb = 8,
+	Sora = 11,
+	Yahiro = 12,
+	Kozue = 13,
+	Karaoke = 14,
+	Web01 = 15,
+	Web02 = 16,
+	Web03 = 17,
+	Web04 = 18,
+	Web05 = 19,
+	Web06 = 20,
+	Countdown = 21,
+	Wallpaper = 22,
+}
+
+enum Menu {
+	Top,
+	ShortScenario,
+	Web,
 }
 
 enum Layer {
@@ -226,7 +246,9 @@ func rgb(r: int, g: int, b: int) -> int:
 func rgba(r: int, g: int, b: int, a: int) -> int:
 	return (a << 24) | (r << 16) | (g << 8) | b
 
-func play_movie(filename: String) -> void:
+func play_movie(filename: String, vol: float = cnf_obj.vol_bgm if cnf_obj.play_bgm else 0.0) -> void:
+	var master := AudioServer.get_bus_index(&"Master")
+	AudioServer.set_bus_volume_linear(master, 0.75 * vol)
 	in_movie = true
 	var movie_layer := CanvasLayer.new()
 	var player := VideoStreamPlayer.new()
@@ -240,13 +262,14 @@ func play_movie(filename: String) -> void:
 	await get_tree().process_frame
 	player.play()
 	while player.is_playing():
-		if Input.is_action_just_pressed("hit", true):
+		if Input.is_action_just_pressed("hit_cancel", true):
 			break
 		await get_tree().process_frame
 	player.stop()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	movie_layer.queue_free()
 	in_movie = false
+	AudioServer.set_bus_volume_linear(master, 0.75)
 
 func create_color_texture(
 	color: Color,
@@ -373,14 +396,19 @@ func destroy_adv_screen() -> void:
 	print("+-DestroyAdvScreen-+")
 	Global.adv.destroy()
 
-func scenario_loop(sc: String) -> void:
+func scenario_loop(sc: String) -> GameAction:
 	SoundSystem.stop_bgm()
 	setup_adv_screen()
 	GssInterpreter.change(sc)
 	adv.set_tone_filter("NORMAL")
 	adv.set_cg_("BLACK")
 	var gas := GAS
-	while sc_obj.scenario_call != &"EXIT_SCENARIO":
+	var ret := GameAction.TitleShortScenario \
+			if &"00_" in sc_obj.scenario_call \
+			or &"KARAOKE" in sc_obj.scenario_call \
+			else GameAction.TitleWeb
+	while sc_obj.scenario_call != &"EXIT_SCENARIO" \
+	and sc_obj.scenario_call != &"EXIT_SCENARIO_LOGO":
 		print_rich("[color=#88ffff]Jump-%s[/color]" % sc_obj.scenario_call)
 		sc = "sc" + sc_obj.scenario_call
 		if not GssInterpreter.load_scenario(sc):
@@ -425,6 +453,9 @@ func scenario_loop(sc: String) -> void:
 	SoundSystem.stop_env_se()
 	SoundSystem.stop_bgm()
 	destroy_adv_screen()
+	if sc_obj.scenario_call == &"EXIT_SCENARIO_LOGO":
+		return GameAction.Logo
+	return ret
 
 func scenario_enter() -> void:
 	if is_load():
@@ -574,21 +605,48 @@ func starting() -> void:
 		match action:
 			GameAction.Logo:
 				await logo()
+				await attention()
+				await play_movie("opening.ogv")
 				action = GameAction.Title
 			GameAction.Title:
-				action = await title()
+				action = await title(Menu.Top)
+			GameAction.TitleShortScenario:
+				action = await title(Menu.ShortScenario)
+			GameAction.TitleWeb:
+				action = await title(Menu.Web)
 			GameAction.Start:
-				await scenario_loop("00_Z000")
-				action = GameAction.Logo
-			GameAction.Continue:
-				await scenario_loop(sc_obj.scenario_call)
+				await scenario_loop("sampleSC")
 				action = GameAction.Logo
 			GameAction.Appreciation:
 				await appreciation()
 				action = GameAction.Title
-			GameAction.TechGian:
-				await scenario_loop("tg01")
-				action = GameAction.Logo
+			GameAction.Wallpaper:
+				push_error("todo wallpaper")
+				action = GameAction.Title
+			GameAction.Continue:
+				action = await scenario_loop(sc_obj.scenario_call)
+			GameAction.Sora:
+				action = await scenario_loop("00_A001")
+			GameAction.Yahiro:
+				action = await scenario_loop("00_G001")
+			GameAction.Kozue:
+				action = await scenario_loop("00_H001")
+			GameAction.Karaoke:
+				action = await scenario_loop("KARAOKE")
+			GameAction.Web01:
+				action = await scenario_loop("WEB01")
+			GameAction.Web02:
+				action = await scenario_loop("WEB02")
+			GameAction.Web03:
+				action = await scenario_loop("WEB03")
+			GameAction.Web04:
+				action = await scenario_loop("WEB04")
+			GameAction.Web05:
+				action = await scenario_loop("WEB05")
+			GameAction.Web06:
+				action = await scenario_loop("WEB06")
+			GameAction.Countdown:
+				action = await scenario_loop("COUNTDOWN")
 			_: break
 
 func logo() -> void:
@@ -599,11 +657,7 @@ func logo() -> void:
 	var spr_logo: TextureRect
 	var cancel := await hit_wait(1.0)
 	if not cancel:
-		var brand_call := [
-			"AK080001", "KA080001", "KO080001", "MT080001",
-			"NO080001", "RH080001", "SR080001", "YH080001",
-		]
-		SoundSystem.play_sys_se(brand_call.pick_random())
+		play_sys_voice("ブランドコール")
 		spr_logo = title_skin.create_texture_rect("ID_FRM_0602")
 		spr_logo.modulate.a = 0.0
 		add_child(spr_logo)
@@ -617,147 +671,329 @@ func logo() -> void:
 	if spr_logo: Anim.destroy(spr_logo)
 	Anim.destroy(spr_base)
 
-func title() -> GameAction:
+func title(state: Menu) -> GameAction:
 	sc_obj = ScenarioObject.new()
 	SoundSystem.play_bgm("BGM07")
-	var spr_base := title_skin.create_texture_rect("ID_FRM_0611")
+	var spr_base := title_skin.create_texture_rect(&"ID_FRM_0611")
 	spr_base.modulate.a = 0.0
 	add_child(spr_base)
-	var spr_logo: Control = title_skin.create_texture_rect("ID_FRM_0612")
-	if Start.yahiro:
-		var btn := ModButton.new()
-		btn.name = "ID_SWITCH"
-		btn.tex_normal = spr_logo.texture
-		btn.material = spr_logo.material
-		spr_logo.free()
-		spr_logo = btn
+	var spr_logo: Control = title_skin.create_texture_rect(&"ID_FRM_0612")
 	spr_logo.modulate.a = 0.0
 	spr_logo.position = Vector2(223, 95)
 	add_child(spr_logo)
-	var spr_tg_logo: TextureRect
-	if Start.yahiro:
-		spr_tg_logo = title_skin.create_texture_rect("ID_FRM_0614")
-		spr_tg_logo.modulate.a = 0.0
-		spr_tg_logo.position = Vector2(369, 171)
-		add_child(spr_tg_logo)
-	var spr_sub_logo: TextureRect
-	if TRIAL:
-		spr_sub_logo = title_skin.create_texture_rect("ID_FRM_0613")
-		spr_sub_logo.modulate.a = 0.0
-		spr_sub_logo.position = Vector2(511, 171)
-		add_child(spr_sub_logo)
-	var spr_tg_menu: TextureRect
-	if Start.yahiro:
-		spr_tg_menu = title_skin.create_form_page("ID_PAGE_MENU_TG")
-		spr_tg_menu.modulate.a = 0.0
-		spr_tg_menu.position = Vector2(313, 324)
-		spr_tg_menu.visible = TECHGIAN
-		var tg: ModButton = spr_tg_menu.get_node("ID_TG")
-		tg.margin_left = 25
-		tg.margin_right = 26
-		add_child(spr_tg_menu)
-	var spr_menu: TextureRect
-	if not TRIAL and is_game_clear():
-		spr_menu = title_skin.create_form_page("ID_PAGE_MENU_FULL")
-	else:
-		spr_menu = title_skin.create_form_page("ID_PAGE_MENU")
-	spr_menu.modulate.a = 0.0
-	spr_menu.position = Vector2(313, 324)
-	spr_menu.visible = not TECHGIAN
-	add_child(spr_menu)
+	var menu_center := Vector2(screen_size.x / 2, 400.0)
+	var spr_top_menu := title_skin.create_form_page(&"ID_PAGE_MENU_FULL")
+	spr_top_menu.modulate.a = 0.0
+	spr_top_menu.position = menu_center - 0.5 * spr_top_menu.size
+	add_child(spr_top_menu)
+	var spr_ss_menu := title_skin.create_form_page(&"ID_PAGE_SHORTSCENARIO")
+	spr_ss_menu.modulate.a = 0.0
+	spr_ss_menu.position = menu_center - 0.5 * spr_ss_menu.size
+	add_child(spr_ss_menu)
+	var spr_web_menu := title_skin.create_form_page(&"ID_PAGE_WEB")
+	spr_web_menu.modulate.a = 0.0
+	spr_web_menu.position = menu_center - 0.5 * spr_web_menu.size
+	add_child(spr_web_menu)
 	var mspr_version := MessageSprite.new()
 	mspr_version.create_message(70, 20)
-	mspr_version.attach_message_style(title_skin, "ID_FONT_VERSION")
+	mspr_version.attach_message_style(title_skin, &"ID_FONT_VERSION")
+	mspr_version.set_default_msg_speed(0, 0, 0)
 	mspr_version.position = Vector2(screen_size) - mspr_version.size
 	mspr_version.output_message("Ver 1.00")
 	mspr_version.modulate.a = 0.0
 	add_child(mspr_version)
 	Anim.fade(mspr_version, 1.0, 0.5)
-	var brand_call := [
-		"AK080002", "KA080002", "KO080002", "MT080002",
-		"NO080002", "RH080002", "SR080002", "YH080002",
-	]
-	SoundSystem.play_sys_se(brand_call.pick_random())
-	if TECHGIAN:
-		Anim.fade(spr_tg_menu, 1.0, 0.3)
-		Anim.fade(spr_logo, 1.0, 0.5)
-		Anim.fade(spr_tg_logo, 1.0, 0.5)
-	else:
-		Anim.fade(spr_menu, 1.0, 0.3)
-		Anim.fade(spr_logo, 1.0, 0.5)
-		if spr_sub_logo:
-			Anim.fade(spr_sub_logo, 1.0, 0.5)
+	play_sys_voice("タイトルコール")
+	spr_top_menu.hide()
+	spr_ss_menu.hide()
+	spr_web_menu.hide()
+	match state:
+		Menu.Top:
+			spr_top_menu.show()
+			Anim.fade(spr_top_menu, 1.0, 0.3)
+		Menu.ShortScenario:
+			spr_ss_menu.show()
+			Anim.fade(spr_ss_menu, 1.0, 0.3)
+		Menu.Web:
+			spr_web_menu.show()
+			Anim.fade(spr_web_menu, 1.0, 0.3)
+	Anim.fade(spr_logo, 1.0, 0.5)
 	await Anim.fade(spr_base, 1.0, 0.5)
 	var ret := GameAction.Return
 	while true:
 		var control := await poll_ui_event()
 		var cid := control.name if control else &""
-		if cid == "ID_START":
-			ret = GameAction.Start
+		if cid == &"ID_SHORTSCENARIO":
+			state = Menu.ShortScenario
+			play_sys_voice("ショートストーリー")
+			spr_ss_menu.show()
+			Anim.fade(spr_top_menu, 0.0, 0.5)
+			await Anim.fade(spr_ss_menu, 1.0, 0.5)
+			spr_top_menu.hide()
+		elif cid == &"ID_SORA":
+			play_sys_voice("ショートストーリー：穹")
+			ret = GameAction.Sora
 			break
-		elif cid == "ID_CONTINUE":
-			Anim.fade(spr_menu, 0.0, 0.3)
+		elif cid == &"ID_YAHIRO":
+			play_sys_voice("ショートストーリー：やひろ")
+			ret = GameAction.Yahiro
+			break
+		elif cid == &"ID_KOZUE":
+			play_sys_voice("ショートストーリー：梢")
+			ret = GameAction.Kozue
+			break
+		elif cid == &"ID_KARAOKE":
+			play_sys_voice("ショートストーリー：初佳")
+			ret = GameAction.Karaoke
+			break
+		elif cid == &"ID_WEB":
+			state = Menu.Web
+			play_sys_voice("WEBコンテンツ：選択")
+			spr_web_menu.show()
+			Anim.fade(spr_top_menu, 0.0, 0.5)
+			await Anim.fade(spr_web_menu, 1.0, 0.5)
+			spr_top_menu.hide()
+		elif cid == &"ID_WEB01":
+			play_sys_voice("コズエノソラ：１")
+			ret = GameAction.Web01
+			break
+		elif cid == &"ID_WEB02":
+			play_sys_voice("コズエノソラ：２")
+			ret = GameAction.Web02
+			break
+		elif cid == &"ID_WEB03":
+			play_sys_voice("コズエノソラ：３")
+			ret = GameAction.Web03
+			break
+		elif cid == &"ID_WEB04":
+			play_sys_voice("コズエノソラ：４")
+			ret = GameAction.Web04
+			break
+		elif cid == &"ID_WEB05":
+			play_sys_voice("コズエノソラ：５")
+			ret = GameAction.Web05
+			break
+		elif cid == &"ID_WEB06":
+			play_sys_voice("コズエノソラ：６")
+			ret = GameAction.Web06
+			break
+		elif cid == &"ID_COUNTDOWN":
+			play_sys_voice("カウントダウ")
+			ret = GameAction.Countdown
+			break
+		elif cid == &"ID_WALLPAPER":
+			play_sys_voice("壁紙")
+			ret = GameAction.Wallpaper
+			break
+		elif cid == &"ID_CONTINUE":
+			Anim.fade(spr_top_menu, 0.0, 0.3)
 			var win := LoadSaveWindow.new(self, true)
 			win._show()
 			var _ret := await win.run()
 			if _ret != GameLogic.Load:
-				Anim.fade(spr_menu, 1.0, 0.3)
+				Anim.fade(spr_top_menu, 1.0, 0.3)
 			await win._hide()
 			win.destroy()
 			if _ret == GameLogic.Load:
 				ret = GameAction.Continue
 				break
-		elif cid == "ID_TG":
-			ret = GameAction.TechGian
-			break
-		elif cid == "ID_CONFIG":
-			Anim.fade(spr_menu, 0.0, 0.3)
+		elif cid == &"ID_CONFIG":
+			play_sys_voice("コンフィグ")
+			Anim.fade(spr_top_menu, 0.0, 0.3)
 			var win := ConfigWindow.new(self, true)
 			win._show()
 			await win.run()
-			Anim.fade(spr_menu, 1.0, 0.3)
+			Anim.fade(spr_top_menu, 1.0, 0.3)
 			await win._hide()
 			win.destroy()
-		elif cid == "ID_APPRECIATION":
+		elif cid == &"ID_APPRECIATION":
+			play_sys_voice("鑑賞モード")
 			ret = GameAction.Appreciation
 			break
-		elif cid == "ID_EXITGAME":
+		elif cid == &"ID_EXITGAME":
 			await ask_game_exit()
-		elif Input.is_action_just_pressed("quick_load") \
-		and sc_obj_qsave \
-		and await confirm(confirm_prompt.qload):
-			await quick_load()
-			ret = GameAction.Continue
-			break
-		elif cid == "ID_SWITCH":
-			TECHGIAN = not TECHGIAN
-			if TECHGIAN: spr_tg_menu.show()
-			else: spr_menu.show()
-			var tg_alpha := 1.0 if TECHGIAN else 0.0
-			Anim.schedule_fade(spr_tg_logo, tg_alpha)
-			Anim.schedule_fade(spr_tg_menu, tg_alpha)
-			Anim.schedule_fade(spr_menu, 1.0 - tg_alpha)
-			await Anim.run(0.3)
-			if TECHGIAN: spr_menu.hide()
-			else: spr_tg_menu.hide()
+		elif Input.is_action_just_pressed(&"quick_load"):
+			if sc_obj_qsave:
+				play_sys_voice(&"クイックロード確認")
+				if await confirm(confirm_prompt.qload):
+					await quick_load()
+					ret = GameAction.Continue
+					break
+		elif Input.is_action_just_pressed(&"hit_cancel"):
+			if state == Menu.ShortScenario:
+				spr_top_menu.show()
+				Anim.fade(spr_top_menu, 1.0, 0.5)
+				await Anim.fade(spr_ss_menu, 0.0, 0.5)
+				spr_ss_menu.hide()
+				SoundSystem.stop_sys_se()
+				state = Menu.Top
+			elif state == Menu.Web:
+				spr_top_menu.show()
+				Anim.fade(spr_top_menu, 1.0, 0.5)
+				await Anim.fade(spr_web_menu, 0.0, 0.5)
+				spr_web_menu.hide()
+				SoundSystem.stop_sys_se()
+				state = Menu.Top
 	SoundSystem.stop_bgm()
-	Anim.schedule_fade(mspr_version, 0.0)
-	Anim.schedule_fade(spr_logo, 0.0)
-	Anim.schedule_fade(spr_tg_logo, 0.0)
-	if spr_sub_logo: Anim.schedule_fade(spr_sub_logo, 0.0)
-	Anim.schedule_fade(spr_base, 0.0)
-	Anim.schedule_fade(spr_menu, 0.0)
-	Anim.schedule_fade(spr_tg_menu, 0.0)
 	var time := 3.0 if ret == GameAction.Start else 0.5
-	await Anim.run(time)
-	Anim.destroy(mspr_version)
-	Anim.destroy(spr_menu)
-	if spr_tg_menu: Anim.destroy(spr_tg_menu)
-	if spr_sub_logo: Anim.destroy(spr_sub_logo)
-	if spr_tg_logo: Anim.destroy(spr_tg_logo)
-	Anim.destroy(spr_logo)
+	var spr_ss_title := TextureRect.new()
+	if state == Menu.ShortScenario:
+		if ret == GameAction.Sora:
+			spr_ss_title.texture = FS.load_texture("SS_SORA")
+		elif ret == GameAction.Yahiro:
+			spr_ss_title.texture = FS.load_texture("SS_YAHIRO")
+		elif ret == GameAction.Kozue:
+			spr_ss_title.texture = FS.load_texture("SS_KOZUE")
+		elif ret == GameAction.Karaoke:
+			spr_ss_title.texture = FS.load_texture("SS_KARAOKE")
+		spr_ss_title.modulate.a = 0.0
+		add_child(spr_ss_title)
+		await Anim.fade(spr_ss_title, 1.0, 2.0)
+		Anim.fade(spr_ss_menu, 0.0, 0.5)
+	elif state == Menu.Web:
+		Anim.fade(spr_web_menu, 0.0, 0.5)
+		Anim.schedule_fade(mspr_version, 0.0)
+		Anim.schedule_fade(spr_logo, 0.0)
+		Anim.schedule_fade(spr_base, 0.0)
+		await Anim.run(time)
+	else:
+		Anim.fade(spr_top_menu, 0.0, 0.5)
+		Anim.schedule_fade(mspr_version, 0.0)
+		Anim.schedule_fade(spr_logo, 0.0)
+		Anim.schedule_fade(spr_base, 0.0)
+		await Anim.run(time)
 	Anim.destroy(spr_base)
+	Anim.destroy(spr_logo)
+	Anim.destroy(spr_top_menu)
+	Anim.destroy(spr_ss_menu)
+	Anim.destroy(spr_web_menu)
+	Anim.destroy(mspr_version)
+	if state == Menu.ShortScenario:
+		var cancel := await SoundSystem.wait_sys_se()
+		if not cancel:
+			cancel = await hit_wait(3.0)
+		if not cancel:
+			await Anim.fade(spr_ss_title, 0.0, 2.0)
+		SoundSystem.stop_sys_se()
+	elif state == Menu.Web:
+		await SoundSystem.wait_sys_se()
+		SoundSystem.stop_sys_se()
+	Anim.destroy(spr_ss_title)
 	return ret
+
+var attention_given := false
+
+func attention() -> void:
+	if attention_given:
+		return
+	await get_tree().process_frame
+	var spr_attention := TextureRect.new()
+	spr_attention.texture = FS.load_texture("attention")
+	add_child(spr_attention)
+	var cancel := false
+	for file: String in ["AK200004", "SR200004",
+			"AK200005", "SR200005", "AK200007", "SR200006"]:
+		SoundSystem.play_voice(file)
+		cancel = await SoundSystem.wait_voice()
+		if cancel: break
+	SoundSystem.stop_voice()
+	if not cancel:
+		cancel = await hit_wait(3.0)
+	if not cancel:
+		await Anim.fade(spr_attention, 0.0, 3.0)
+	Anim.destroy(spr_attention)
+	attention_given = true
+
+var VOICE_CALLS: Dictionary[String, PackedStringArray] = {
+	"ブランドコール": ["AK200001", "KA200001", "KO200001", "MT200001", "NO200001", "RH200001", "SR200001", "YH200001"],
+	"タイトルコール": ["AK200002", "KA200002", "KO200002", "MT200002", "NO200002", "RH200002", "SR200002", "YH200002"],
+	"アイキャッチ": ["AK200003", "KA200003", "KO200003", "MT200003", "SR200003"],
+	"ワーニング": ["warning"],
+	"セーブしました": ["AK200008", "KA200004", "KO200003", "MT200004", "NO200003", "SR200007", "YH200003"],
+	"セーブ上書き確認": ["AK200009", "KA200005", "KO200004", "MT200005", "NO200004", "SR200008", "YH200004"],
+	"ロード確認": ["AK200010", "KA200006", "KO200005", "MT200006", "NO200005", "SR200009", "YH200005"],
+	"クイックセーブしました": ["AK200011", "KA200007", "KO200006", "MT200007", "NO200006", "SR200010", "YH200006"],
+	"クイックロード確認": ["AK200012", "KA200008", "KO200007", "MT200008", "NO200007", "SR200011", "YH200007"],
+	"スクリーンモード": ["AK200013", "KA200009", "KO200008", "MT200009", "NO200008", "SR200012", "YH200008"],
+	"ウィンドウモード": ["AK200014", "KA200010", "KO200009", "MT200010", "NO200009", "SR200013", "YH200009"],
+	"フルスクリーンモード": ["AK200015", "KA200011", "KO200010", "MT200011", "NO200010", "SR200014", "YH200010"],
+	"音楽オン": ["AK200016", "KA200012", "KO200011", "MT200012", "NO200011", "SR200015", "YH200011"],
+	"音楽オフ": ["AK200017", "KA200013", "KO200012", "MT200013", "NO200012", "SR200016", "YH200012"],
+	"音楽ボリューム": ["AK200018", "KA200014", "KO200013", "MT200014", "NO200013", "SR200017", "YH200013"],
+	"効果音オン": ["AK200019", "KA200015", "KO200014", "MT200015", "NO200014", "SR200018", "YH200014"],
+	"効果音オフ": ["AK200020", "KA200016", "KO200015", "MT200016", "NO200015", "SR200019", "YH200015"],
+	"効果音ボリューム": ["AK200021", "KA200017", "KO200016", "MT200017", "NO200016", "SR200020", "YH200016"],
+	"システム音オン": ["AK200022", "KA200018", "KO200017", "MT200018", "NO200017", "SR200021", "YH200017"],
+	"システム音オフ": ["AK200023", "KA200019", "KO200018", "MT200019", "NO200018", "SR200022", "YH200018"],
+	"システム音ボリューム": ["AK200024", "KA200020", "KO200019", "MT200020", "NO200019", "SR200023", "YH200019"],
+	"音声オン": ["AK200025", "KA200021", "KO200020", "MT200021", "NO200020", "SR200024", "YH200020"],
+	"音声オフ": ["AK200026", "KA200022", "KO200021", "MT200022", "NO200021", "SR200025", "YH200021"],
+	"音声ボリューム": ["AK200027", "KA200023", "KO200022", "MT200023", "NO200022", "SR200026", "YH200022"],
+	"音声：穹オン": ["SR200027"],
+	"音声：穹オフ": ["SR200029"],
+	"音声：奈緒オン": ["NO200023"],
+	"音声：奈緒オフ": ["NO200024"],
+	"音声：瑛オン": ["AK200028"],
+	"音声：瑛オフ": ["AK200029"],
+	"音声：一葉オン": ["KA200024"],
+	"音声：一葉オフ": ["KA200025"],
+	"音声：初佳オン": ["MT200024"],
+	"音声：初佳オフ": ["MT200025"],
+	"音声：やひろオン": ["YH200023"],
+	"音声：やひろオフ": ["YH200024"],
+	"音声：梢オン": ["KO200023"],
+	"音声：梢オフ": ["KO200024"],
+	"音声：亮平オン": ["RH200003"],
+	"音声：亮平オフ": ["RH200004"],
+	"音声：その他オン": ["SR200028"],
+	"音声：その他オフ": ["AK200030"],
+	"画面効果オン": ["AK200031", "KA200026", "KO200025", "MT200026", "NO200025", "SR200030", "YH200025"],
+	"画面効果オフ": ["AK200032", "KA200027", "KO200026", "MT200027", "NO200026", "SR200031", "YH200026"],
+	"ウィンドウ濃度": ["AK200033", "KA200028", "KO200027", "MT200028", "NO200027", "SR200032", "YH200027"],
+	"メッセージ表示速度": ["AK200034", "KA200029", "KO200028", "MT200029", "NO200028", "SR200033", "YH200028"],
+	"メッセージスキップ：既読のみ": ["AK200035", "KA200030", "KO200029", "MT200030", "SR200034", "YH200029"],
+	"メッセージスキップ：全部": ["AK200036", "KA200031", "KO200030", "MT200031", "NO200030", "SR200035", "YH200030"],
+	"音声制御：抑制なし": ["AK200037", "KA200032", "KO200031", "MT200032", "NO200031", "SR200036", "YH200031"],
+	"音声制御：抑制あり": ["AK200038", "KO200032", "MT200033", "NO200032", "YH200032"],
+	"オートモードメッセージ送り速度": ["AK200039", "KA200034", "KO200033", "MT200034", "NO200033", "SR200038", "YH200033"],
+	"初期設定に戻す": ["AK200040", "KA200035", "KO200034", "MT200035", "NO200034", "SR200039", "YH200034"],
+	"ゲーム終了": ["AK200041", "KA200036", "KO200035", "MT200036", "NO200035", "SR200040", "YH200035"],
+	"タイトルに戻る": ["AK200042", "KA200037", "KO200036", "MT200037", "NO200036", "SR200041", "YH200036"],
+	"終了ボイス": ["AK200043", "KA200038", "KO200037", "MT200038", "NO200037", "SR200042", "YH200037"],
+	"ショートストーリー": ["AK200044", "KO200038", "SR200043", "YH200038"],
+	"ショートストーリー：穹": ["SR200045"],
+	"ショートストーリー：やひろ": ["YH200039"],
+	"ショートストーリー：梢": ["KO200041"],
+	"ショートストーリー：初佳": ["MT200041"],
+	"カウントダウン": ["AK200046"],
+	"WEBコンテンツ：選択": ["KA200039", "MT200039"],
+	"コズエノソラ：選択": ["KO200043"],
+	"コズエノソラ：１": ["AK200047"],
+	"コズエノソラ：２": ["NO200039"],
+	"コズエノソラ：３": ["SR200046"],
+	"コズエノソラ：４": ["KA200041"],
+	"コズエノソラ：５": ["MT200042"],
+	"コズエノソラ：６": ["KO200042"],
+	"壁紙": ["SR200044", "NO200038"],
+	"鑑賞モード": ["AK200045", "KO200040"],
+	"コンフィグ": ["KA200040", "MT200040"],
+	"ショートストーリー終了：穹": ["SR200047"],
+	"ショートストーリー終了：やひろ": ["YH200040"],
+	"ショートストーリー終了：梢": ["KO200044"],
+	"ショートストーリー終了：全員": []
+}
+
+func play_sys_voice(type: String) -> void:
+	var file := get_sys_voice_file(type)
+	if not file.is_empty():
+		await SoundSystem.play_sys_se(file)
+
+func get_sys_voice_file(type: String) -> String:
+	if type not in VOICE_CALLS: return ""
+	var voice := VOICE_CALLS[type]
+	if voice.is_empty(): return ""
+	prints(voice, voice.size())
+	return voice[randi_range(0, voice.size() - 1)]
 #endregion
 
 #region file-9.cos

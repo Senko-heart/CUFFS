@@ -174,6 +174,15 @@ func schedule_move(target: Node, pos: Vector2) -> void:
 func move(target: Node, pos: Vector2, time: float) -> void:
 	await run_single(target, _move(pos), time)
 
+func _rotate(angle: float, accel: Vector2 = Vector2(3.0, 0.0)) -> Dictionary:
+	return { rotation = { target = angle, accel = accel }}
+
+func schedule_rotate(target: Node, angle: float) -> void:
+	schedule(target, _rotate(angle))
+
+func rotate(target: Node, angle: float, time: float) -> void:
+	await run_single(target, _rotate(angle), time)
+
 func _scale(
 	to: Vector2,
 	from: Vector2,

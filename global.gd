@@ -6,7 +6,7 @@ const StepResult := GssInterpreter.StepResult
 const TimeZone := CgInfo.TimeZone
 var TRIAL := false
 var TECHGIAN := false
-const SAVE_NUM := 60
+const SAVE_NUM := 99
 const GAS := 10000
 
 enum GameLogic {
@@ -67,6 +67,7 @@ var in_movie := false
 var in_confirm := false
 var in_eye_catch := false
 var eye_catch_type := ""
+var in_ask_game_exit := false
 var load_effect := CanvasLayer.new()
 var load_effect_alpha: Texture2D
 var eye_catch := CanvasLayer.new()
@@ -139,7 +140,11 @@ func _process(_delta: float) -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
-		await ask_game_exit()
+		if in_movie:
+			Input.action_press("hit_cancel")
+			Input.action_release("hit_cancel")
+		else:
+			await ask_game_exit()
 	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		Input.action_press("hit_cancel")
 		await get_tree().process_frame
@@ -469,8 +474,12 @@ func printsteperr(message: String, sc: String) -> void:
 	printerr("in: %s" % GssInterpreter.l)
 
 func ask_game_exit() -> void:
+	if in_ask_game_exit: return
+	in_ask_game_exit = true
+	play_sys_voice("ゲーム終了")
 	if await confirm(confirm_prompt.quit):
 		save_and_quit()
+	in_ask_game_exit = false
 
 func save_and_quit() -> void:
 	save_system_data()
@@ -480,12 +489,12 @@ func save_and_quit() -> void:
 
 func on_flag(i: int) -> void:
 	if 0 < i and i < 512:
-		print("Flag%s-ON" % i)
+		print_rich("[color=#aaffaa]Flag%s-ON[/color]" % i)
 		sc_obj.flag.set_(i)
 
 func off_flag(i: int) -> void:
 	if 0 < i and i < 512:
-		print("Flag%s-OFF" % i)
+		print_rich("[color=#aaffaa]Flag%s-OFF[/color]" % i)
 		sc_obj.flag.reset(i)
 
 func chk_flag(i: int) -> bool:
@@ -621,7 +630,7 @@ func starting() -> void:
 				await appreciation()
 				action = GameAction.Title
 			GameAction.Wallpaper:
-				push_error("todo wallpaper")
+				await wallpaper()
 				action = GameAction.Title
 			GameAction.Continue:
 				action = await scenario_loop(sc_obj.scenario_call)
@@ -992,7 +1001,6 @@ func get_sys_voice_file(type: String) -> String:
 	if type not in VOICE_CALLS: return ""
 	var voice := VOICE_CALLS[type]
 	if voice.is_empty(): return ""
-	prints(voice, voice.size())
 	return voice[randi_range(0, voice.size() - 1)]
 #endregion
 
@@ -1853,4 +1861,10 @@ func staff_roll(type: int) -> void:
 	SoundSystem.stop_bgm()
 	var view := StaffRollView.new(self)
 	await view.run(type)
+#endregion
+
+#region file-15.cos
+func wallpaper() -> void:
+	var view := WallPaperViewer.new(self)
+	await view.run()
 #endregion

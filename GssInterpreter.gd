@@ -532,10 +532,9 @@ func sc_stop_env_se(file: String, fade: int) -> void:
 func sc_play_se(file: String, wait: int) -> void:
 	if Global.is_load():
 		return
+	SoundSystem.play_se(file)
 	if wait != 0 and not Global.adv.is_skip():
-		await SoundSystem.play_se(file)
-	else:
-		SoundSystem.play_se(file)
+		await SoundSystem.wait_se()
 
 func sc_stop_se() -> void:
 	SoundSystem.stop_se()

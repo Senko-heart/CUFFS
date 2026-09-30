@@ -220,10 +220,14 @@ func play_se(file: String) -> void:
 	FS.load_sound(file, se)
 	se.volume_linear = Global.cnf_obj.vol_se
 	se.play()
-	await _stop_signal(se)
 
 func stop_se() -> void:
 	se.stream = null
+
+func wait_se(key_disable: bool = false) -> bool:
+	var canceled := await _stop_signal(se, key_disable)
+	stop_se()
+	return canceled
 
 func play_sys_se(file: String) -> void:
 	print("SysSe-%s" % file)
@@ -231,13 +235,14 @@ func play_sys_se(file: String) -> void:
 	FS.load_voice(file, sys_se)
 	sys_se.volume_linear = Global.cnf_obj.vol_sys_se
 	sys_se.play()
-	await _stop_signal(sys_se)
 
 func stop_sys_se() -> void:
 	sys_se.stream = null
 
 func wait_sys_se(key_disable: bool = false) -> bool:
-	return await _stop_signal(sys_se, key_disable)
+	var canceled := await _stop_signal(sys_se, key_disable)
+	stop_sys_se()
+	return canceled
 
 func set_sys_se_volume(vol: float) -> void:
 	Global.cnf_obj.vol_sys_se = vol
@@ -257,7 +262,9 @@ func stop_voice() -> void:
 	voice.stream = null
 
 func wait_voice(key_disable: bool = false) -> bool:
-	return await _stop_signal(voice, key_disable)
+	var canceled := await _stop_signal(voice, key_disable)
+	stop_voice()
+	return canceled
 
 func is_play_voice() -> bool:
 	return voice.playing

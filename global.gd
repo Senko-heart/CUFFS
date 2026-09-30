@@ -995,7 +995,7 @@ var VOICE_CALLS: Dictionary[String, PackedStringArray] = {
 func play_sys_voice(type: String) -> void:
 	var file := get_sys_voice_file(type)
 	if not file.is_empty():
-		await SoundSystem.play_sys_se(file)
+		SoundSystem.play_sys_se(file)
 
 func get_sys_voice_file(type: String) -> String:
 	if type not in VOICE_CALLS: return ""

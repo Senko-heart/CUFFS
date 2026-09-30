@@ -124,14 +124,18 @@ func set_page(index: int) -> void:
 
 func loadsave(save_index: int) -> GameLogic:
 	if is_load:
+		Global.play_sys_voice("ロード確認")
 		if await Global.confirm(Global.confirm_prompt.load % (save_index + 1)):
 			await Global.normal_load(save_index)
 			return GameLogic.Load
 	elif Global.sc_objects[save_index]:
+		Global.play_sys_voice("セーブ上書き確認")
 		if await Global.confirm(Global.confirm_prompt.save % (save_index + 1)):
 			await Global.normal_save(save_index)
 			set_page(int(ID_SCROLL.value))
+			Global.play_sys_voice("セーブしました")
 	else:
+		Global.play_sys_voice("セーブしました")
 		await Global.normal_save(save_index)
 		set_page(int(ID_SCROLL.value))
 	return GameLogic.Unaffected
@@ -156,6 +160,7 @@ func run() -> GameLogic:
 			set_page(index + 1)
 		elif cid == "ID_QSAVE" or Input.is_action_pressed("quick_load"):
 			if Global.sc_obj_qsave:
+				Global.play_sys_voice("クイックロード確認")
 				if await Global.confirm(Global.confirm_prompt.qload):
 					await Global.quick_load()
 					return GameLogic.Load

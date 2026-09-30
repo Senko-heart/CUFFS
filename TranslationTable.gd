@@ -9,9 +9,6 @@ var system_tbl: Dictionary[String, String] = {}
 
 func initialize() -> void:
 	load_options()
-	if Start.yahiro:
-		load_yahiro_table("mess", mess_tbl)
-		load_yahiro_table("choice", choice_tbl)
 	load_table("name", name_tbl)
 	load_table("mess", mess_tbl)
 	load_table("choice", choice_tbl)
@@ -54,9 +51,6 @@ func load_custom_rows(arc: ZR, filename: String, case_sensitive: bool = true) ->
 
 func load_table(filename: String, tbl: Dictionary) -> void:
 	put_rows_in_the_table(load_table_rows(filename), tbl)
-
-func load_yahiro_table(filename: String, tbl: Dictionary) -> void:
-	put_rows_in_the_table(load_custom_rows(FS.yahiro, filename), tbl)
 
 func put_rows_in_the_table(rows: PackedStringArray, tbl: Dictionary) -> void:
 	for row in rows:

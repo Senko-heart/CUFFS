@@ -37,6 +37,21 @@ func is_put_on_load(key: String) -> bool:
 	mutex.unlock()
 	return ret
 
+func load_bitmap(key: String, bytes: PackedByteArray) -> void:
+	var task := func() -> void:
+		var mask := Image.new()
+		mask.load_png_from_buffer(bytes)
+		mask.convert(Image.FORMAT_LA8)
+		for y in range(0, mask.get_height()):
+			for x in range(0, mask.get_width()):
+				var color := mask.get_pixel(x, y)
+				color.a = color.r
+				mask.set_pixel(x, y, color)
+		var bitmap := BitMap.new()
+		bitmap.create_from_image_alpha(mask)
+		_write(key, bitmap)
+	tasks[key] = WorkerThreadPool.add_task(task, false, key)
+
 func load_simple_png(key: String, bytes: PackedByteArray) -> void:
 	var task := func() -> void:
 		var image := Image.new()
@@ -102,6 +117,9 @@ func load_webp(key: String, bytes: PackedByteArray, is_hires: bool) -> void:
 		else:
 			_write(key, frames[0])
 	tasks[key] = WorkerThreadPool.add_task(task, false, key)
+
+func get_bitmap(key: String) -> BitMap:
+	return wait(key)
 
 func get_texture(key: String) -> Texture2D:
 	return wait(key)

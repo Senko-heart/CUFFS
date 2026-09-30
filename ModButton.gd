@@ -7,6 +7,7 @@ extends BaseButton
 @export var tex_pushed_focus: Texture2D = null
 @export var tex_disabled: Texture2D = null
 @export var tex_push_disabled: Texture2D = null
+@export var mask: BitMap = null
 
 var noninteractive: bool:
 	set(value):
@@ -36,6 +37,7 @@ func _get_minimum_size() -> Vector2:
 	return size
 
 func _has_point(point: Vector2) -> bool:
+	if mask: return mask.get_bitv(point)
 	var extra_size := Vector2(margin_left + margin_right, margin_top + margin_bottom)
 	return Rect2(Vector2.ZERO, size - extra_size).has_point(point)
 

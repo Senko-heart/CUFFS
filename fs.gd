@@ -8,7 +8,6 @@ var patch := ZR.new()
 var decensor := ZR.new()
 var hires := ZR.new()
 var soundmod := ZR.new()
-var yahiro := ZR.new()
 
 var frame := ZR.new()
 var option := ZR.new()
@@ -69,9 +68,6 @@ func _open_archives() -> void:
 					a if a is int else 0,
 					b if b is int else 0,
 				)
-	if Start.yahiro:
-		yahiro.open(root + "yahiro.zip")
-		Start.store_yahiro = yahiro.is_open()
 	
 	var system := root + "system"
 	frame.open(system.path_join("frame.zip"))
@@ -276,10 +272,7 @@ func load_voice(
 		case_sensitive
 	)
 	if bytes.is_empty():
-		if not Start.yahiro: return false
-		var yahiro_voice := "voice".path_join(filename)
-		bytes = yahiro.read_file(yahiro_voice, case_sensitive)
-		if bytes.is_empty(): return false
+		return false
 	var stream := AudioStreamOggVorbis.load_from_buffer(bytes)
 	snd.stream = stream
 	snd.filename = filename
@@ -291,8 +284,7 @@ func exists_voice(
 ) -> bool:
 	filename += ".ogg"
 	return (patch.file_exists(filename, case_sensitive)
-	or voice.file_exists(filename, case_sensitive)
-	or Start.yahiro and yahiro.file_exists("voice".path_join(filename), case_sensitive))
+	or voice.file_exists(filename, case_sensitive))
 
 func load_sound(
 	filename: String,
@@ -410,7 +402,7 @@ func put_texture_on_load(
 	case_sensitive: bool = false
 ) -> void:
 	var key := filename if case_sensitive else filename.to_upper()
-	var arcs: Array[ZR] = [hires, decensor, patch, data1, data2, yahiro]
+	var arcs: Array[ZR] = [hires, decensor, patch, data1, data2]
 	var exts: PackedStringArray = [".png", ".jpg", ".webp"]
 	var pos := _lookup_file(arcs, filename, exts, case_sensitive)
 	if Start.full:

@@ -63,8 +63,6 @@ func load_scenario(sc: String, case_sensitive: bool = false) -> bool:
 		bytes = FS.patch.read_file(patch_src, case_sensitive)
 	elif FS.scenario.file_exists(src, case_sensitive):
 		bytes = FS.scenario.read_file(src, case_sensitive)
-	elif Start.yahiro and FS.yahiro.file_exists(patch_src, case_sensitive):
-		bytes = FS.yahiro.read_file(patch_src, case_sensitive)
 	else: return false
 	var string := bytes.get_string_from_utf8()
 	if string.is_empty(): return false
@@ -377,7 +375,7 @@ func step_condition() -> StepResult:
 			if Global.is_load():
 				sat = Global.sc_obj.faux_clear
 			else:
-				sat = Global.is_game_clear() or Start.unlock_sora
+				sat = Global.is_game_clear()
 				Global.sc_obj.faux_clear = sat
 		else:
 			dead_depth = 0

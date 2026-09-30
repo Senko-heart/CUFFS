@@ -50,9 +50,15 @@ func _load_resource(id: String, src: String) -> void:
 	var bytes := _try_load(src)
 	if bytes.is_empty():
 		print(src)
-	match src.get_extension():
-		"png": _rc.load_simple_png(id, bytes)
-		_: push_error("unknown resource type " + src)
+	var base := src.get_basename()
+	var ext := src.get_extension()
+	if ext == &"png":
+		if base.ends_with("_"):
+			_rc.load_bitmap(id, bytes)
+		else:
+			_rc.load_simple_png(id, bytes)
+	else:
+		push_error("unknown resource type " + src)
 
 func _bake_style(style: Dictionary) -> void:
 	var obj := {}
@@ -69,6 +75,7 @@ func _bake_style(style: Dictionary) -> void:
 			&"disabled": _add_atlas(obj, key, val)
 			&"push_disabled": _add_atlas(obj, key, val)
 			&"scroll": _add_atlas(obj, key, val)
+			&"mask": _add_mask(obj, val)
 			_: obj[key] = val
 
 func _add_atlas(obj: Dictionary, key: StringName, val: Dictionary) -> void:
@@ -90,6 +97,10 @@ func _add_atlas(obj: Dictionary, key: StringName, val: Dictionary) -> void:
 		push_error(val.column + " is not found")
 		return
 	obj[key] = texture
+
+func _add_mask(obj: Dictionary, val: Dictionary) -> void:
+	var bitmap := _rc.get_bitmap(val.image)
+	obj.mask = bitmap
 
 func create_texture_rect(id: StringName) -> TextureRect:
 	var control := TextureRect.new()
@@ -114,6 +125,7 @@ func _init_button(btn: ModButton, style: Dictionary) -> void:
 	if &"pushed_focus" in style: btn.tex_pushed_focus = style.pushed_focus
 	if &"disabled" in style: btn.tex_disabled = style.disabled
 	if &"push_disabled" in style: btn.tex_push_disabled = style.push_disabled
+	if &"mask" in style: btn.mask = style.mask
 
 func _create_radio(style: Dictionary, btn_group: ButtonGroup) -> ModButton:
 	var btn := _create_button(style)

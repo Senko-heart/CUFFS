@@ -1398,254 +1398,146 @@ func check_setup_cg(filename: String, cg_info: CgInfo) -> void:
 	elif s == &"B36B": cg_info.time_zone = TimeZone.Evening
 	elif s == &"B38B": cg_info.time_zone = TimeZone.Evening
 	elif s == &"B39B": cg_info.time_zone = TimeZone.Evening
-	elif check_cg(s, &"EA01A", 100, 101): pass
-	elif check_cg(s, &"EA01B", 100, 102): pass
-	elif check_cg(s, &"EA01C", 100, 103): pass
-	elif check_cg(s, &"EA01D", 100, 104): pass
-	elif check_cg(s, &"EA01E", 100, 105): pass
-	elif check_cg(s, &"EA01F", 100, 106): pass
-	elif check_cg(s, &"EA01G", 100, 107): pass
-	elif check_cg(s, &"EA01H", 100, 108): pass
-	elif check_cg(s, &"EA02", 110, 111): pass
-	elif check_cg(s, &"EA03A", 120, 121): pass
-	elif check_cg(s, &"EA03B", 120, 122): pass
-	elif check_cg(s, &"EA04A", 130, 131): pass
-	elif check_cg(s, &"EA04B", 130, 132): pass
-	elif check_cg(s, &"EA04C", 130, 133): pass
-	elif check_cg(s, &"EA05", 140, 141): pass
-	elif check_cg(s, &"EA06A", 150, 151): pass
-	elif check_cg(s, &"EA06B", 150, 152): pass
-	elif check_cg(s, &"EA06C", 150, 153): pass
-	elif check_cg(s, &"EA06D", 150, 154): pass
-	elif check_cg(s, &"EA06E", 150, 155): pass
-	elif check_cg(s, &"EA07", 160, 161): pass
-	elif check_cg(s, &"EA08A", 170, 171): pass
-	elif check_cg(s, &"EA08B", 170, 172): pass
-	elif check_cg(s, &"EA08C", 170, 173): pass
-	elif check_cg(s, &"EA09A", 180, 181): pass
-	elif check_cg(s, &"EA09B", 180, 182): pass
-	elif check_cg(s, &"EA09C", 180, 183): pass
-	elif check_cg(s, &"EA09D", 180, 184): pass
-	elif check_cg(s, &"EA10A", 190, 191): pass
-	elif check_cg(s, &"EA10B", 190, 192): pass
-	elif check_cg(s, &"EA10C", 190, 193): pass
-	elif check_cg(s, &"EA10D", 190, 194): pass
-	elif check_cg(s, &"EA11A", 200, 201): pass
-	elif check_cg(s, &"EA11B", 200, 202): pass
-	elif check_cg(s, &"EA11C", 200, 203): pass
-	elif check_cg(s, &"EA11D", 200, 204): pass
-	elif check_cg(s, &"EA12A", 210, 211): pass
-	elif check_cg(s, &"EA12B", 210, 212): pass
-	elif check_cg(s, &"EA12C", 210, 213): pass
-	elif check_cg(s, &"EA13A", 220, 221): pass
-	elif check_cg(s, &"EA13B", 220, 222): pass
-	elif check_cg(s, &"EA13C", 220, 223): pass
-	elif check_cg(s, &"EA14", 230, 231): pass
-	elif check_cg(s, &"EA15", 240, 241): pass
-	elif check_cg(s, &"EA16A", 250, 251): pass
-	elif check_cg(s, &"EA16B", 250, 252): pass
-	elif check_cg(s, &"EA17A", 260, 261): pass
-	elif check_cg(s, &"EA17B", 260, 262): pass
-	elif check_cg(s, &"EA17C", 260, 263): pass
-	elif check_cg(s, &"EA18A", 270, 271): pass
-	elif check_cg(s, &"EA18B", 270, 272): pass
-	elif check_cg(s, &"EB01A", 280, 281): pass
-	elif check_cg(s, &"EB01B", 280, 282): pass
-	elif check_cg(s, &"EB02A", 290, 291): pass
-	elif check_cg(s, &"EB02B", 290, 292): pass
-	elif check_cg(s, &"EB03", 300, 301): pass
-	elif check_cg(s, &"EB04A", 310, 311): pass
-	elif check_cg(s, &"EB04B", 310, 312): pass
-	elif check_cg(s, &"EB04A_", 310, 313): pass
-	elif check_cg(s, &"EB05", 320, 321): pass
-	elif check_cg(s, &"EB06A", 330, 331): pass
-	elif check_cg(s, &"EB06B", 330, 332): pass
-	elif check_cg(s, &"EB07A", 340, 341): pass
-	elif check_cg(s, &"EB07B", 340, 342): pass
-	elif check_cg(s, &"EB08A", 350, 351): pass
-	elif check_cg(s, &"EB08B", 350, 352): pass
-	elif check_cg(s, &"EB08C", 350, 353): pass
-	elif check_cg(s, &"EB08A_", 350, 354): pass
-	elif check_cg(s, &"EB08B_", 350, 355): pass
-	elif check_cg(s, &"EB09", 360, 361): pass
-	elif check_cg(s, &"EB10A", 370, 371): pass
-	elif check_cg(s, &"EB10B", 370, 372): pass
-	elif check_cg(s, &"EB11A", 380, 381): pass
-	elif check_cg(s, &"EB11B", 380, 382): pass
-	elif check_cg(s, &"EB12A", 390, 391): pass
-	elif check_cg(s, &"EB12B", 390, 392): pass
-	elif check_cg(s, &"EB12C", 390, 393): pass
-	elif check_cg(s, &"EB13A", 400, 401): pass
-	elif check_cg(s, &"EB13B", 400, 402): pass
-	elif check_cg(s, &"EB14", 410, 411): pass
-	elif check_cg(s, &"EB15", 420, 421): pass
-	elif check_cg(s, &"EB16A", 430, 431): pass
-	elif check_cg(s, &"EB16B", 430, 432): pass
-	elif check_cg(s, &"EB16C", 430, 433): pass
-	elif check_cg(s, &"EB17A", 440, 441): pass
-	elif check_cg(s, &"EB17B", 440, 442): pass
-	elif check_cg(s, &"EB17C", 440, 443): pass
-	elif check_cg(s, &"EB18", 450, 451): pass
-	elif check_cg(s, &"EC01A", 460, 461): pass
-	elif check_cg(s, &"EC01B", 460, 462): pass
-	elif check_cg(s, &"EC02A", 470, 471): pass
-	elif check_cg(s, &"EC02B", 470, 472): pass
-	elif check_cg(s, &"EC02C", 470, 473): pass
-	elif check_cg(s, &"EC03A", 480, 481): pass
-	elif check_cg(s, &"EC03B", 480, 482): pass
-	elif check_cg(s, &"EC03C", 480, 483): pass
-	elif check_cg(s, &"EC03D", 480, 484): pass
-	elif check_cg(s, &"EC04A", 490, 491): pass
-	elif check_cg(s, &"EC04B", 490, 492): pass
-	elif check_cg(s, &"EC05A", 500, 501): pass
-	elif check_cg(s, &"EC05B", 500, 502): pass
-	elif check_cg(s, &"EC06A", 510, 511): pass
-	elif check_cg(s, &"EC06B", 510, 512): pass
-	elif check_cg(s, &"EC07A", 520, 521): pass
-	elif check_cg(s, &"EC07B", 520, 522): pass
-	elif check_cg(s, &"EC07C", 520, 523): pass
-	elif check_cg(s, &"EC08", 530, 531): pass
-	elif check_cg(s, &"EC09", 540, 541): pass
-	elif check_cg(s, &"EC10A", 550, 551): pass
-	elif check_cg(s, &"EC10B", 550, 552): pass
-	elif check_cg(s, &"EC10C", 550, 553): pass
-	elif check_cg(s, &"EC10D", 550, 554): pass
-	elif check_cg(s, &"EC10E", 550, 555): pass
-	elif check_cg(s, &"EC10F", 550, 556): pass
-	elif check_cg(s, &"EC11A", 560, 561): pass
-	elif check_cg(s, &"EC11B", 560, 562): pass
-	elif check_cg(s, &"EC11C", 560, 563): pass
-	elif check_cg(s, &"EC12A", 570, 571): pass
-	elif check_cg(s, &"EC12B", 570, 572): pass
-	elif check_cg(s, &"EC12C", 570, 573): pass
-	elif check_cg(s, &"EC13A", 580, 581): pass
-	elif check_cg(s, &"EC13B", 580, 582): pass
-	elif check_cg(s, &"EC13C", 580, 583): pass
-	elif check_cg(s, &"EC13D", 580, 584): pass
-	elif check_cg(s, &"EC13E", 580, 584): pass
-	elif check_cg(s, &"EC14", 590, 591): pass
-	elif check_cg(s, &"EC15", 600, 601): pass
-	elif check_cg(s, &"EC16A", 610, 611): pass
-	elif check_cg(s, &"EC16B", 610, 612): pass
-	elif check_cg(s, &"EC16C", 610, 613): pass
-	elif check_cg(s, &"EC16D", 610, 614): pass
-	elif check_cg(s, &"EC17A", 620, 621): pass
-	elif check_cg(s, &"EC17B", 620, 622): pass
-	elif check_cg(s, &"EC17C", 620, 623): pass
-	elif check_cg(s, &"EC18", 630, 631): pass
-	elif check_cg(s, &"ED01A", 640, 641): pass
-	elif check_cg(s, &"ED01B", 640, 642): pass
-	elif check_cg(s, &"ED01C", 640, 643): pass
-	elif check_cg(s, &"ED02A", 650, 651): pass
-	elif check_cg(s, &"ED02B", 650, 652): pass
-	elif check_cg(s, &"ED03A", 660, 661): pass
-	elif check_cg(s, &"ED03B", 660, 662): pass
-	elif check_cg(s, &"ED03C", 660, 663): pass
-	elif check_cg(s, &"ED04", 670, 671): pass
-	elif check_cg(s, &"ED05", 680, 681): pass
-	elif check_cg(s, &"ED06A", 690, 691): pass
-	elif check_cg(s, &"ED06B", 690, 692): pass
-	elif check_cg(s, &"ED06C", 690, 693): pass
-	elif check_cg(s, &"ED07A", 700, 701): pass
-	elif check_cg(s, &"ED07B", 700, 702): pass
-	elif check_cg(s, &"ED08", 710, 711): pass
-	elif check_cg(s, &"ED09", 720, 721): pass
-	elif check_cg(s, &"ED10A", 730, 731): pass
-	elif check_cg(s, &"ED10B", 730, 732): pass
-	elif check_cg(s, &"ED10C", 730, 733): pass
-	elif check_cg(s, &"ED11A", 740, 741): pass
-	elif check_cg(s, &"ED11B", 740, 742): pass
-	elif check_cg(s, &"ED11C", 740, 743): pass
-	elif check_cg(s, &"ED11D", 740, 744): pass
-	elif check_cg(s, &"ED12A", 750, 751): pass
-	elif check_cg(s, &"ED12B", 750, 752): pass
-	elif check_cg(s, &"ED12C", 750, 753): pass
-	elif check_cg(s, &"ED13A", 760, 761): pass
-	elif check_cg(s, &"ED13B", 760, 762): pass
-	elif check_cg(s, &"ED14", 770, 771): pass
-	elif check_cg(s, &"ED15", 780, 781): pass
-	elif check_cg(s, &"ED16A", 790, 791): pass
-	elif check_cg(s, &"ED16B", 790, 792): pass
-	elif check_cg(s, &"ED16C", 790, 793): pass
-	elif check_cg(s, &"ED17A", 800, 801): pass
-	elif check_cg(s, &"ED17B", 800, 802): pass
-	elif check_cg(s, &"ED17C", 800, 803): pass
-	elif check_cg(s, &"ED18A", 810, 811): pass
-	elif check_cg(s, &"ED18B", 810, 812): pass
-	elif check_cg(s, &"ED18C", 810, 813): pass
-	elif check_cg(s, &"EE01A", 820, 821): pass
-	elif check_cg(s, &"EE01B", 820, 822): pass
-	elif check_cg(s, &"EE01C", 820, 823): pass
-	elif check_cg(s, &"EE01D", 820, 824): pass
-	elif check_cg(s, &"EE02A", 830, 831): pass
-	elif check_cg(s, &"EE02B", 830, 832): pass
-	elif check_cg(s, &"EE02C", 830, 833): pass
-	elif check_cg(s, &"EE02D", 830, 834): pass
-	elif check_cg(s, &"EE03A", 840, 841): pass
-	elif check_cg(s, &"EE03B", 840, 842): pass
-	elif check_cg(s, &"EE04A", 850, 851): pass
-	elif check_cg(s, &"EE04B", 850, 852): pass
-	elif check_cg(s, &"EE04C", 850, 853): pass
-	elif check_cg(s, &"EE05A", 860, 861): pass
-	elif check_cg(s, &"EE05B", 860, 862): pass
-	elif check_cg(s, &"EE06A", 870, 871): pass
-	elif check_cg(s, &"EE06B", 870, 872): pass
-	elif check_cg(s, &"EE07A", 880, 881): pass
-	elif check_cg(s, &"EE07B", 880, 882): pass
-	elif check_cg(s, &"EE08A", 890, 891): pass
-	elif check_cg(s, &"EE08B", 890, 892): pass
-	elif check_cg(s, &"EE09", 900, 901): pass
-	elif check_cg(s, &"EE10A", 910, 911): pass
-	elif check_cg(s, &"EE10B", 910, 912): pass
-	elif check_cg(s, &"EE10C", 910, 913): pass
-	elif check_cg(s, &"EE10D", 910, 914): pass
-	elif check_cg(s, &"EE11A", 920, 921): pass
-	elif check_cg(s, &"EE11B", 920, 922): pass
-	elif check_cg(s, &"EE11C", 920, 923): pass
-	elif check_cg(s, &"EE12A", 930, 931): pass
-	elif check_cg(s, &"EE12B", 930, 932): pass
-	elif check_cg(s, &"EE12C", 930, 933): pass
-	elif check_cg(s, &"EE12D", 930, 934): pass
-	elif check_cg(s, &"EE13A", 940, 941): pass
-	elif check_cg(s, &"EE13B", 940, 942): pass
-	elif check_cg(s, &"EE13C", 940, 943): pass
-	elif check_cg(s, &"EE14", 950, 951): pass
-	elif check_cg(s, &"EE15", 960, 961): pass
-	elif check_cg(s, &"EE16A", 970, 971): pass
-	elif check_cg(s, &"EE16B", 970, 972): pass
-	elif check_cg(s, &"EE17A", 980, 981): pass
-	elif check_cg(s, &"EE17B", 980, 982): pass
-	elif check_cg(s, &"EE18", 990, 991): pass
-	elif check_cg(s, &"EZ01A", 1000, 1001):
-		cg_info.effect_param.type = EffectParam.EffectType.TileImage
-		cg_info.effect_param.interval = 100
-		cg_info.effect_param.degree_step = 0
-		cg_info.effect_param.size_view = Vector2i(800, 600)
-		cg_info.effect_param.pt_speed = Vector2i(1, 0)
-	elif check_cg(s, &"EZ01B", 1000, 1002):
-		cg_info.effect_param.type = EffectParam.EffectType.TileImage
-		cg_info.effect_param.interval = 100
-		cg_info.effect_param.degree_step = 0
-		cg_info.effect_param.size_view = Vector2i(800, 600)
-		cg_info.effect_param.pt_speed = Vector2i(1, 0)
-		cg_info.time_zone = TimeZone.Evening
-	elif check_cg(s, &"EZ02", 1010, 1011): pass
-	elif check_cg(s, &"EZ03", 1020, 1021): pass
-	elif check_cg(s, &"EZ04A", 1030, 1031): pass
-	elif check_cg(s, &"EZ04B", 1030, 1032): pass
-	elif check_cg(s, &"EZ05A", 1040, 1041): pass
-	elif check_cg(s, &"EZ05B", 1040, 1042): pass
-	elif check_cg(s, &"EZ05C", 1040, 1043): pass
-	elif check_cg(s, &"EZ05D", 1040, 1044): pass
-	elif check_cg(s, &"EZ06A", 1050, 1051): pass
-	elif check_cg(s, &"EZ06B", 1050, 1052): pass
-	elif check_cg(s, &"EZ06C", 1050, 1053): pass
-	elif check_cg(s, &"EZ06D", 1050, 1054): pass
-	elif check_cg(s, &"EZ06E", 1050, 1055): pass
-	elif check_cg(s, &"EZ06F", 1050, 1056): pass
-	elif check_cg(s, &"EZ07", 1060, 1061): pass
-	elif check_cg(s, &"EZ08", 1070, 1071): pass
-	elif check_cg(s, &"SP"): pass
+	elif check_cg(s, &"EA05", 90, 91): pass
+	elif check_cg(s, &"EA07", 95, 96): pass
+	elif check_cg(s, &"EA08A", 100, 101): pass
+	elif check_cg(s, &"EA08B", 100, 102): pass
+	elif check_cg(s, &"EA08C", 100, 103): pass
+	elif check_cg(s, &"EA18A", 105, 106): pass
+	elif check_cg(s, &"EA18B", 105, 107): pass
+	elif check_cg(s, &"EA19A", 110, 111): pass
+	elif check_cg(s, &"EA19B", 110, 112): pass
+	elif check_cg(s, &"EA19C", 110, 113): pass
+	elif check_cg(s, &"EA20A", 120, 121): pass
+	elif check_cg(s, &"EA20B", 120, 122): pass
+	elif check_cg(s, &"EA21A", 130, 131): pass
+	elif check_cg(s, &"EA21B", 130, 132): pass
+	elif check_cg(s, &"EA21C", 130, 133): pass
+	elif check_cg(s, &"EA22A", 140, 141): pass
+	elif check_cg(s, &"EA22B", 140, 142): pass
+	elif check_cg(s, &"EA22C", 140, 143): pass
+	elif check_cg(s, &"EA22D", 140, 144): pass
+	elif check_cg(s, &"EA23A", 150, 151): pass
+	elif check_cg(s, &"EA23B", 150, 152): pass
+	elif check_cg(s, &"EA24A", 160, 161): pass
+	elif check_cg(s, &"EA24B", 160, 162): pass
+	elif check_cg(s, &"EA24C", 160, 163): pass
+	elif check_cg(s, &"EA25A", 170, 171): pass
+	elif check_cg(s, &"EA25B", 170, 172): pass
+	elif check_cg(s, &"EA25C", 170, 173): pass
+	elif check_cg(s, &"EA25D", 170, 174): pass
+	elif check_cg(s, &"EA26A", 180, 181): pass
+	elif check_cg(s, &"EA26B", 180, 182): pass
+	elif check_cg(s, &"EA26C", 180, 183): pass
+	elif check_cg(s, &"EA26D", 180, 184): pass
+	elif check_cg(s, &"EA26E", 180, 185): pass
+	elif check_cg(s, &"EA26F", 180, 186): pass
+	elif check_cg(s, &"EA26G", 180, 187): pass
+	elif check_cg(s, &"EA26H", 180, 188): pass
+	elif check_cg(s, &"EA27A", 190, 191): pass
+	elif check_cg(s, &"EA27B", 190, 192): pass
+	elif check_cg(s, &"EA27C", 190, 193): pass
+	elif check_cg(s, &"EA27D", 190, 194): pass
+	elif check_cg(s, &"EA27E", 190, 195): pass
+	elif check_cg(s, &"EA27F", 190, 196): pass
+	elif check_cg(s, &"EA27G", 190, 197): pass
+	elif check_cg(s, &"EA27H", 190, 198): pass
+	elif check_cg(s, &"EA28A", 200, 201): pass
+	elif check_cg(s, &"EA28B", 200, 202): pass
+	elif check_cg(s, &"EA28C", 200, 203): pass
+	elif check_cg(s, &"EA28D", 200, 204): pass
+	elif check_cg(s, &"EA29A", 210, 211): pass
+	elif check_cg(s, &"EA29B", 210, 212): pass
+	elif check_cg(s, &"EA29C", 210, 213): pass
+	elif check_cg(s, &"EC02A", 220, 221): pass
+	elif check_cg(s, &"EC02B", 220, 222): pass
+	elif check_cg(s, &"EC02C", 220, 223): pass
+	elif check_cg(s, &"ED02A", 230, 231): pass
+	elif check_cg(s, &"ED02B", 230, 232): pass
+	elif check_cg(s, &"EE01A", 240, 241): pass
+	elif check_cg(s, &"EE01B", 240, 242): pass
+	elif check_cg(s, &"EE01C", 240, 243): pass
+	elif check_cg(s, &"EE01D", 240, 244): pass
+	elif check_cg(s, &"EE02A", 250, 251): pass
+	elif check_cg(s, &"EE02B", 250, 252): pass
+	elif check_cg(s, &"EE02C", 250, 253): pass
+	elif check_cg(s, &"EE02D", 250, 254): pass
+	elif check_cg(s, &"EZ04A", 260, 261): pass
+	elif check_cg(s, &"EZ04B", 260, 262): pass
+	elif check_cg(s, &"EZ07A", 270, 271): pass
+	elif check_cg(s, &"EZ07B", 270, 272): pass
+	elif check_cg(s, &"EZ08A", 280, 281): pass
+	elif check_cg(s, &"EZ08B", 280, 282): pass
+	elif check_cg(s, &"EZ08C", 280, 283): pass
+	elif check_cg(s, &"EZ09A", 290, 291): pass
+	elif check_cg(s, &"EZ09B", 290, 292): pass
+	elif check_cg(s, &"EZ09C", 290, 293): pass
+	elif check_cg(s, &"EZ09D", 290, 294): pass
+	elif check_cg(s, &"EZ10", 300, 301): pass
+	elif check_cg(s, &"EZ11", 310, 311): pass
+	elif check_cg(s, &"EZ12A", 320, 321): pass
+	elif check_cg(s, &"EZ12B", 320, 322): pass
+	elif check_cg(s, &"EZ12C", 320, 323): pass
+	elif check_cg(s, &"EZ12D", 320, 324): pass
+	elif check_cg(s, &"EZ12E", 320, 325): pass
+	elif check_cg(s, &"EZ12F", 320, 326): pass
+	elif check_cg(s, &"EZ13A", 330, 331): pass
+	elif check_cg(s, &"EZ13B", 330, 332): pass
+	elif check_cg(s, &"EZ13C", 330, 333): pass
+	elif check_cg(s, &"EZ13D", 330, 334): pass
+	elif check_cg(s, &"EZ14A", 340, 341): pass
+	elif check_cg(s, &"EZ14B", 340, 342): pass
+	elif check_cg(s, &"EZ14C", 340, 343): pass
+	elif check_cg(s, &"EZ15A", 350, 351): pass
+	elif check_cg(s, &"EZ15B", 350, 352): pass
+	elif check_cg(s, &"EZ15C", 350, 353): pass
+	elif check_cg(s, &"EZ15D", 350, 354): pass
+	elif check_cg(s, &"EZ16A", 360, 361): pass
+	elif check_cg(s, &"EZ16B", 360, 362): pass
+	elif check_cg(s, &"EZ16C", 360, 363): pass
+	elif check_cg(s, &"EZ16D", 360, 364): pass
+	elif check_cg(s, &"EZ16E", 360, 365): pass
+	elif check_cg(s, &"EZ17A", 370, 371): pass
+	elif check_cg(s, &"EZ17B", 370, 372): pass
+	elif check_cg(s, &"EZ17C", 370, 373): pass
+	elif check_cg(s, &"EZ17D", 370, 374): pass
+	elif check_cg(s, &"EZ17E", 370, 375): pass
+	elif check_cg(s, &"EZ20", 380, 381): pass
+	elif check_cg(s, &"EZ21A", 390, 391): pass
+	elif check_cg(s, &"EZ21B", 390, 392): pass
+	elif check_cg(s, &"EZ21C", 390, 393): pass
+	elif check_cg(s, &"EZ21D", 390, 394): pass
+	elif check_cg(s, &"EZ21E", 390, 395): pass
+	elif check_cg(s, &"EZ22A", 400, 401): pass
+	elif check_cg(s, &"EZ22B", 400, 402): pass
+	elif check_cg(s, &"EZ22C", 400, 403): pass
+	elif check_cg(s, &"EZ23A", 410, 411): pass
+	elif check_cg(s, &"EZ23B", 410, 412): pass
+	elif check_cg(s, &"EZ24A", 420, 421): pass
+	elif check_cg(s, &"EZ24B", 420, 422): pass
+	elif check_cg(s, &"EZ25A", 430, 431): pass
+	elif check_cg(s, &"EZ25B", 430, 432): pass
+	elif check_cg(s, &"EZ25C", 430, 433): pass
+	elif check_cg(s, &"EZ25D", 430, 434): pass
+	elif check_cg(s, &"EZ25E", 430, 435): pass
+	elif check_cg(s, &"EZ25F", 430, 436): pass
+	elif check_cg(s, &"EZ25G", 430, 437): pass
+	elif check_cg(s, &"EZ25H", 430, 438): pass
+	elif check_cg(s, &"EZ25I", 430, 439): pass
+	elif check_cg(s, &"EZ25J", 430, 440): pass
+	elif check_cg(s, &"EZ25K", 430, 441): pass
+	elif check_cg(s, &"EZ25L", 430, 442): pass
+	elif check_cg(s, &"EZ26A", 450, 451): pass
+	elif check_cg(s, &"EZ26B", 450, 452): pass
+	elif check_cg(s, &"EZ26C", 450, 453): pass
+	elif check_cg(s, &"EZ26D", 450, 454): pass
+	elif check_cg(s, &"EZ27A", 460, 461): pass
+	elif check_cg(s, &"EZ27B", 460, 462): pass
+	elif check_cg(s, &"EZ27C", 460, 463): pass
+	elif check_cg(s, &"EZ28A", 470, 471): pass
+	elif check_cg(s, &"EZ28B", 470, 472): pass
+	elif check_cg(s, &"EZ28C", 470, 473): pass
+	elif check_cg(s, &"EZ28D", 470, 474): pass
 	cg_info.filename = s
 
 func check_setup_bustup(filename: String, _timezone: int) -> BustupInfo:
@@ -1664,7 +1556,6 @@ func check_setup_bustup(filename: String, _timezone: int) -> BustupInfo:
 		elif check_bu(s, &"05_", 5): pass
 		elif check_bu(s, &"06_", 6): pass
 		elif check_bu(s, &"07_", 7): pass
-		elif check_bu(s, &"EZ01CA"): pass
 		else: file_not_found = true
 	elif &"CB" in s:
 		id = 3
@@ -1675,7 +1566,6 @@ func check_setup_bustup(filename: String, _timezone: int) -> BustupInfo:
 		elif check_bu(s, &"05_", 15): pass
 		elif check_bu(s, &"06_", 16): pass
 		elif check_bu(s, &"07_", 17): pass
-		elif check_bu(s, &"EZ01CB"): pass
 		else: file_not_found = true
 	elif &"CC" in s:
 		id = 2
@@ -1687,7 +1577,6 @@ func check_setup_bustup(filename: String, _timezone: int) -> BustupInfo:
 		elif check_bu(s, &"06_", 26): pass
 		elif check_bu(s, &"07_", 27): pass
 		elif check_bu(s, &"08_", 28): pass
-		elif check_bu(s, &"EZ01CC"): pass
 		else: file_not_found = true
 	elif &"CD" in s:
 		id = 5
@@ -1698,7 +1587,6 @@ func check_setup_bustup(filename: String, _timezone: int) -> BustupInfo:
 		elif check_bu(s, &"05_", 35): pass
 		elif check_bu(s, &"06_", 36): pass
 		elif check_bu(s, &"07_", 37): pass
-		elif check_bu(s, &"EZ01CD"): pass
 		else: file_not_found = true
 	elif &"CE" in s:
 		id = 6
@@ -1715,13 +1603,14 @@ func check_setup_bustup(filename: String, _timezone: int) -> BustupInfo:
 		elif check_bu(s, &"04_", 54): pass
 		elif check_bu(s, &"05_", 55): pass
 		elif check_bu(s, &"06_", 56): pass
-		elif check_bu(s, &"EZ01CF"): pass
 		else: file_not_found = true
 	elif &"CG" in s:
 		id = 8
 		if   check_bu(s, &"01_", 61): pass
 		elif check_bu(s, &"02_", 62): pass
 		elif check_bu(s, &"03_", 63): pass
+		elif check_bu(s, &"04_", 64): pass
+		elif check_bu(s, &"05_", 65): pass
 		else: file_not_found = true
 	elif &"CH" in s:
 		id = 9
@@ -1732,6 +1621,8 @@ func check_setup_bustup(filename: String, _timezone: int) -> BustupInfo:
 		elif check_bu(s, &"05_", 75): pass
 		elif check_bu(s, &"06_", 76): pass
 		elif check_bu(s, &"07_", 77): pass
+		elif check_bu(s, &"08_", 78): pass
+		elif check_bu(s, &"09_", 79): pass
 		else: file_not_found = true
 	elif &"CI" in s:
 		id = 12
@@ -1741,8 +1632,6 @@ func check_setup_bustup(filename: String, _timezone: int) -> BustupInfo:
 		else: file_not_found = true
 	elif &"CK" in s:
 		id = 11
-		if   check_bu(s, &"01_", 91): pass
-		else: file_not_found = true
 	elif &"CL" in s:
 		id = 99
 	else: file_not_found = true
@@ -1808,37 +1697,22 @@ func check_true_name(alias_name: String) -> Dictionary:
 	return names
 
 func is_h_scene(filename: String) -> bool:
-	if   &"EA10" in filename: return true
-	elif &"EA11" in filename: return true
-	elif &"EA12" in filename: return true
-	elif &"EA13" in filename: return true
-	elif &"EA16" in filename: return true
-	elif &"EA17" in filename: return true
-	elif &"EB01" in filename: return true
-	elif &"EB10" in filename: return true
-	elif &"EB11" in filename: return true
-	elif &"EB12" in filename: return true
-	elif &"EB13" in filename: return true
-	elif &"EB16" in filename: return true
-	elif &"EB17" in filename: return true
-	elif &"EC10" in filename: return true
-	elif &"EC11" in filename: return true
-	elif &"EC12" in filename: return true
-	elif &"EC13" in filename: return true
-	elif &"EC16" in filename: return true
-	elif &"EC17" in filename: return true
-	elif &"ED10" in filename: return true
-	elif &"ED11" in filename: return true
-	elif &"ED12" in filename: return true
-	elif &"ED13" in filename: return true
-	elif &"ED16" in filename: return true
-	elif &"ED17" in filename: return true
-	elif &"EE10" in filename: return true
-	elif &"EE11" in filename: return true
-	elif &"EE12" in filename: return true
-	elif &"EE13" in filename: return true
-	elif &"EE16" in filename: return true
-	elif &"EE17" in filename: return true
+	if   &"EA24" in filename: return true
+	elif &"EA25" in filename: return true
+	elif &"EA26" in filename: return true
+	elif &"EA27" in filename: return true
+	elif &"EA28" in filename: return true
+	elif &"EA29" in filename: return true
+	elif &"EZ12" in filename: return true
+	elif &"EZ13" in filename: return true
+	elif &"EZ14" in filename: return true
+	elif &"EZ15" in filename: return true
+	elif &"EZ16" in filename: return true
+	elif &"EZ17" in filename: return true
+	elif &"EZ25" in filename: return true
+	elif &"EZ26" in filename: return true
+	elif &"EZ27" in filename: return true
+	elif &"EZ28" in filename: return true
 	else: return false
 
 func check_play_voice(true_name: String) -> bool:

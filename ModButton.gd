@@ -37,7 +37,7 @@ func _get_minimum_size() -> Vector2:
 	return size
 
 func _has_point(point: Vector2) -> bool:
-	if mask: return mask.get_bitv(point)
+	if mask: return Rect2i(Vector2i.ZERO, mask.get_size()).has_point(point) and mask.get_bitv(point)
 	var extra_size := Vector2(margin_left + margin_right, margin_top + margin_bottom)
 	return Rect2(Vector2.ZERO, size - extra_size).has_point(point)
 

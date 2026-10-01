@@ -94,6 +94,14 @@ func set0(
 		r_task.spr_base.modulate.a = 0.0
 		Anim.schedule_fade(r_task.spr_base, 1.0)
 		Anim.schedule_move(r_task.spr_base, pt_end)
+	elif type == 6:
+		r_task.spr_pic.position = pt_center - Vector2(0, pos)
+		r_task.spr_pic.offset = -pt_center
+		Anim.schedule_linear_scale(r_task.spr_pic, Vector2.ONE, Vector2(1.5, 1.5))
+		r_task.spr_base.texture = black(int(pic_size.x), int(pic_size.y))
+		r_task.spr_base.position = pt_start
+		r_task.spr_base.modulate.a = 0.0
+		Anim.schedule_fade(r_task.spr_base, 1.0)
 	else: return
 	r_task.spr_base.add_child(r_task.spr_pic)
 	add_child(r_task.spr_base)
@@ -110,7 +118,7 @@ func set1(type: int, start: float, life: float = 0.0,
 	var start_time := task[-1].begin_time
 	while elapsed_time() < start_time:
 		await get_tree().process_frame
-		if Input.is_action_just_pressed("hit"):
+		if Input.is_action_just_pressed("hit_cancel"):
 			exit = true
 			return
 		loop_proc()
@@ -142,6 +150,9 @@ func loop_proc(elapsed: float = elapsed_time()) -> void:
 				elif r_task.type == 5:
 					Anim.run(0.5, [r_task.spr_base])
 					Anim.run(50, [r_task.spr_pic])
+				elif r_task.type == 6:
+					Anim.run(0.5, [r_task.spr_base])
+					Anim.run(50, [r_task.spr_pic])
 				r_task.status = 2
 
 func destroy_proc(force: bool = false) -> void:
@@ -164,148 +175,105 @@ func run(type: int) -> void:
 	Global.adv.hide_message(true)
 	var adv_screen := await Global.adv.create_capture(false)
 	if type == 4:
-		await set1(1, 5, 10, "FRM_0612", Vector2(-1, -1))
-	elif type == 3:
-		await set1(1, 5, 10, "FRM_0612", Vector2(-1, -1))
-	elif type == 2:
-		await set1(1, 5, 10, "FRM_0612", Vector2(-1, 330))
-	elif type == 5:
-		await set1(1, 5, 10, "FRM_0612", Vector2(-1, -1))
-	elif type == 6:
-		await set1(1, 5, 10, "FRM_0612", Vector2(-1, -1))
-	set0(2, 14, 9, "FRM_0801", Vector2(131, 0), Vector2(0, 0))
+		await set1(1, 5, 10, "title", Vector2(-1, -1))
+	elif type == 8:
+		await set1(1, 5, 10, "title", Vector2(-1, -1))
+	elif type == 9:
+		await set1(1, 5, 10, "title", Vector2(-1, 330))
+	set0(2, 14, 12, "FRM_0901", Vector2(131, 0), Vector2(0, 0))
 	if type == 4:
-		await set1(3, 14, 9, adv_screen, Vector2(131, 0), Vector2(306, 0), 131, Vector2(265, 251))
-	elif type == 3:
-		await set1(3, 14, 9, adv_screen, Vector2(154, 0), Vector2(306, 0), 154, Vector2(389, 237))
-	elif type == 2:
-		await set1(3, 14, 9, adv_screen, Vector2(154, 0), Vector2(306, 0), 154, Vector2(398, 310))
-	elif type == 5:
-		await set1(3, 14, 9, adv_screen, Vector2(169, 0), Vector2(306, 0), 169, Vector2(419, 232))
-	elif type == 6:
-		await set1(3, 14, 9, adv_screen, Vector2(122, 0), Vector2(306, 0), 122, Vector2(329, 249))
-	set0(4, 22, 14, "FRM_0802", Vector2(0, 370 - 100), Vector2(0, 370))
+		await set1(3, 14, 12, adv_screen, Vector2(131, 0), Vector2(306, 0), 140, Vector2(202, 256))
+	elif type == 8:
+		await set1(3, 14, 12, adv_screen, Vector2(154, 0), Vector2(306, 0), 174, Vector2(372, 51))
+	elif type == 9:
+		await set1(3, 14, 12, adv_screen, Vector2(154, 0), Vector2(306, 0), 64, Vector2(166, 66))
+	set0(4, 24, 14, "FRM_0902", Vector2(0, 370 - 100), Vector2(0, 370))
 	if type == 4:
-		await set1(5, 22, 27, "EA01a", Vector2(0, 100), Vector2(0, 0), 0, Vector2(360, 0))
-	elif type == 3:
-		await set1(5, 22, 27, "EB01a", Vector2(0, 100), Vector2(0, 0), 0, Vector2(800, 216))
-	elif type == 2:
-		await set1(5, 22, 27, "EC01a", Vector2(0, 100), Vector2(0, 0), 0, Vector2(364, 197))
-	elif type == 5:
-		await set1(5, 22, 27, "ED01a", Vector2(0, 100), Vector2(0, 0), 61, Vector2(273, -100))
-	elif type == 6:
-		await set1(5, 22, 27, "EE01a", Vector2(0, 100), Vector2(0, 0), 0, Vector2(361, 0))
+		await set1(5, 24, 23, "B07a", Vector2(0, 100), Vector2(0, 0), 101, Vector2(195, 154))
+	elif type == 8:
+		await set1(5, 24, 23, "B15a", Vector2(0, 100), Vector2(0, 0), 94, Vector2(138, 167))
+	elif type == 9:
+		await set1(5, 24, 23, "B19a", Vector2(0, 100), Vector2(0, 0), 63, Vector2(226, 122))
 	Global.adv.destroy_capture()
 	Global.destroy_adv_screen()
-	await set1(4, 35, 14, "FRM_0803", Vector2(0, 370))
-	set0(2, 48, 14, "FRM_0804", Vector2(494 - 100, 0), Vector2(494, 0))
+	await set1(4, 34, 14, "FRM_0903", Vector2(0, 370))
+	set0(2, 44, 14, "FRM_0904", Vector2(494 - 100, 0), Vector2(494, 0))
 	if type == 4:
-		await set1(3, 48, 27, "EA06a", Vector2(100, 0), Vector2(0, 0), 485, Vector2(800, 111))
-	elif type == 3:
-		await set1(3, 48, 27, "EB08a", Vector2(100, 0), Vector2(0, 0), 269, Vector2(800, 0))
-	elif type == 2:
-		await set1(3, 48, 27, "EC02a", Vector2(100, 0), Vector2(0, 0), 238, Vector2(732, 0))
-	elif type == 5:
-		await set1(3, 48, 27, "ED06a", Vector2(100, 0), Vector2(0, 0), 138, Vector2(65, 218))
-	elif type == 6:
-		await set1(3, 48, 27, "EE05a", Vector2(100, 0), Vector2(0, 0), 110, Vector2(0, 0))
-	await set1(2, 60, 14, "FRM_0805", Vector2(494, 0))
-	set0(4, 73, 14, "FRM_0806", Vector2(0, 100), Vector2(0, 0))
+		await set1(3, 44, 33, "EA19a", Vector2(100, 0), Vector2(0, 0), 233, Vector2(236, 159))
+	elif type == 8:
+		await set1(3, 44, 33, "EZ07a", Vector2(100, 0), Vector2(0, 0), 22, Vector2(223, 26))
+	elif type == 9:
+		await set1(3, 44, 33, "EZ20", Vector2(100, 0), Vector2(0, 0), 69, Vector2(177, 63))
+	await set1(2, 54, 14, "FRM_0905", Vector2(494, 0))
+	await set1(2, 64, 14, "FRM_0906", Vector2(494, 0))
+	set0(4, 74, 14, "FRM_0907", Vector2(0, 100), Vector2(0, 0))
 	if type == 4:
-		await set1(5, 73, 27, "EA05", Vector2(0, 230 - 100), Vector2(0, 230), 0, Vector2(0, 203))
-	elif type == 3:
-		await set1(5, 73, 27, "EB07b", Vector2(0, 230 - 100), Vector2(0, 230), 0, Vector2(0, 188))
-	elif type == 2:
-		await set1(5, 73, 27, "EC05a", Vector2(0, 230 - 100), Vector2(0, 230), 73, Vector2(527, 143))
-	elif type == 5:
-		await set1(5, 73, 27, "ED02a", Vector2(0, 230 - 100), Vector2(0, 230), 0, Vector2(180, 0))
-	elif type == 6:
-		await set1(5, 73, 27, "EE02a", Vector2(0, 230 - 100), Vector2(0, 230), 133, Vector2(0, 140))
-	await set1(4, 86, 14, "FRM_0807", Vector2(0, 0))
-	set0(2, 99, 14, "FRM_0808", Vector2(131, 0), Vector2(0, 0))
+		await set1(5, 74, 23, "B12a", Vector2(0, 230 - 100), Vector2(0, 230), 141, Vector2(569, 175))
+	elif type == 8:
+		await set1(5, 74, 23, "B39a", Vector2(0, 230 - 100), Vector2(0, 230), 110, Vector2(611, 140))
+	elif type == 9:
+		await set1(5, 74, 23, "B17a", Vector2(0, 230 - 100), Vector2(0, 230), 137, Vector2(588, 104))
+	await set1(4, 84, 14, "FRM_0908", Vector2(0, 0))
+	set0(2, 94, 14, "FRM_0909", Vector2(131, 0), Vector2(0, 0))
 	if type == 4:
-		await set1(3, 99, 27, "EA07", Vector2(131, 0), Vector2(306, 0), 183, Vector2(361, 295))
-	elif type == 3:
-		await set1(3, 99, 27, "EB02a", Vector2(131, 0), Vector2(306, 0), 41, Vector2(223, 151))
-	elif type == 2:
-		await set1(3, 99, 27, "EC03b", Vector2(131, 0), Vector2(306, 0), 280, Vector2(770, 0))
-	elif type == 5:
-		await set1(3, 99, 27, "ED07a", Vector2(131, 0), Vector2(306, 0), 130, Vector2(611, 40))
-	elif type == 6:
-		await set1(3, 99, 27, "EE10a", Vector2(131, 0), Vector2(306, 0), 100, Vector2(0, 0))
-	await set1(2, 112, 14, "FRM_0809", Vector2(0, 0), Vector2(0, 0))
-	set0(4, 125, 14, "FRM_0810", Vector2(0, 370 - 100), Vector2(0, 370))
+		await set1(3, 94, 33, "EA20a", Vector2(131, 0), Vector2(306, 0), 157, Vector2(227, 280))
+	elif type == 8:
+		await set1(3, 94, 33, "EZ08a", Vector2(131, 0), Vector2(306, 0), 0, Vector2(0, 60))
+	elif type == 9:
+		await set1(3, 94, 33, "EZ22a", Vector2(131, 0), Vector2(306, 0), 0, Vector2(119, 98))
+	await set1(2, 104, 14, "FRM_0910", Vector2(0, 0), Vector2(0, 0))
+	await set1(2, 114, 14, "FRM_0911", Vector2(0, 0), Vector2(0, 0))
+	set0(4, 124, 14, "FRM_0912", Vector2(0, 370 - 100), Vector2(0, 370))
 	if type == 4:
-		await set1(5, 125, 27, "EA12a", Vector2(0, 100), Vector2(0, 0), 0, Vector2(140, 69))
-	elif type == 3:
-		await set1(5, 125, 27, "EB05", Vector2(0, 100), Vector2(0, 0), 0, Vector2(0, 0))
-	elif type == 2:
-		await set1(5, 125, 27, "EC06a", Vector2(0, 100), Vector2(0, 0), 89, Vector2(444, -100))
-	elif type == 5:
-		await set1(5, 125, 27, "ED09", Vector2(0, 100), Vector2(0, 0), 0, Vector2(100, 0))
-	elif type == 6:
-		await set1(5, 125, 27, "EE04c", Vector2(0, 100), Vector2(0, 0), 0, Vector2(673, 0))
-	await set1(4, 138, 14, "FRM_0811", Vector2(0, 370))
-	set0(2, 151, 14, "FRM_0812", Vector2(494 - 100, 0), Vector2(494, 0))
+		await set1(5, 124, 23, "B01a", Vector2(0, 100), Vector2(0, 0), 60, Vector2(313, 235))
+	elif type == 8:
+		await set1(5, 124, 23, "B35b", Vector2(0, 100), Vector2(0, 0), 143, Vector2(20, 180))
+	elif type == 9:
+		await set1(5, 124, 23, "B48a", Vector2(0, 100), Vector2(0, 0), 201, Vector2(681, 83))
+	await set1(4, 134, 14, "FRM_0913", Vector2(0, 370))
+	set0(2, 144, 14, "FRM_0914", Vector2(494 - 100, 0), Vector2(494, 0))
 	if type == 4:
-		await set1(3, 151, 27, "EA10a", Vector2(100, 0), Vector2(0, 0), 306, Vector2(700, 0))
-	elif type == 3:
-		await set1(3, 151, 27, "EB10a", Vector2(100, 0), Vector2(0, 0), 23, Vector2(171, 171))
-	elif type == 2:
-		await set1(3, 151, 27, "EZ06a", Vector2(100, 0), Vector2(0, 0), 0, Vector2(0, 275))
-	elif type == 5:
-		await set1(3, 151, 27, "ED10a", Vector2(100, 0), Vector2(0, 0), 150, Vector2(160, 0))
-	elif type == 6:
-		await set1(3, 151, 27, "EE06a", Vector2(100, 0), Vector2(0, 0), 306, Vector2(50, 0))
-	await set1(2, 164, 14, "FRM_0813", Vector2(494, 0))
-	set0(4, 177, 14, "FRM_0814", Vector2(0, 100), Vector2(0, 0))
+		await set1(3, 144, 33, "EA21a", Vector2(100, 0), Vector2(0, 0), 0, Vector2(196, 166))
+	elif type == 8:
+		await set1(3, 144, 33, "EZ09a", Vector2(100, 0), Vector2(0, 0), 0, Vector2(414, 30))
+	elif type == 9:
+		await set1(3, 144, 33, "EZ23a", Vector2(100, 0), Vector2(0, 0), 221, Vector2(474, 14))
+	await set1(2, 154, 14, "FRM_0915", Vector2(494, 0))
+	await set1(2, 164, 14, "FRM_0916", Vector2(494, 0))
+	set0(4, 174, 14, "FRM_0917", Vector2(0, 100), Vector2(0, 0))
 	if type == 4:
-		await set1(5, 177, 27, "EA13a", Vector2(0, 230 - 100), Vector2(0, 230), 49, Vector2(100, 50))
-	elif type == 3:
-		await set1(5, 177, 27, "EB04a", Vector2(0, 230 - 100), Vector2(0, 230), 0, Vector2(0, 10))
-	elif type == 2:
-		await set1(5, 177, 27, "EC09", Vector2(0, 230 - 100), Vector2(0, 230), 0, Vector2(800, 173))
-	elif type == 5:
-		await set1(5, 177, 27, "ED04", Vector2(0, 230 - 100), Vector2(0, 230), 148, Vector2(412, 0))
-	elif type == 6:
-		await set1(5, 177, 27, "EE12a", Vector2(0, 230 - 100), Vector2(0, 230), 45, Vector2(379, 266))
-	await set1(4, 190, 14, "FRM_0815", Vector2(0, 0))
-	set0(2, 203, 14, "FRM_0816", Vector2(131, 0), Vector2(0, 0))
+		await set1(5, 174, 23, "B44a", Vector2(0, 230 - 100), Vector2(0, 230), 184, Vector2(206, 109))
+	elif type == 8:
+		await set1(5, 174, 23, "B41c", Vector2(0, 230 - 100), Vector2(0, 230), 156, Vector2(396, 180))
+	elif type == 9:
+		await set1(5, 174, 23, "B43a", Vector2(0, 230 - 100), Vector2(0, 230), 22, Vector2(400, 0))
+	await set1(4, 184, 14, "FRM_0918", Vector2(0, 0))
+	set0(2, 194, 14, "FRM_0919", Vector2(131, 0), Vector2(0, 0))
 	if type == 4:
-		await set1(3, 203, 27, "EA02", Vector2(131, 0), Vector2(306, 0), 171, Vector2(418, 0))
-	elif type == 3:
-		await set1(3, 203, 27, "EB03", Vector2(131, 0), Vector2(306, 0), 168, Vector2(413, 229))
-	elif type == 2:
-		await set1(3, 203, 27, "EC10a", Vector2(131, 0), Vector2(306, 0), 0, Vector2(0, 0))
-	elif type == 5:
-		await set1(3, 203, 27, "ED05", Vector2(131, 0), Vector2(306, 0), 182, Vector2(800, 0))
-	elif type == 6:
-		await set1(3, 203, 27, "EE03a", Vector2(131, 0), Vector2(306, 0), 100, Vector2(0, 0))
-	await set1(2, 216, 14, "FRM_0817", Vector2(0, 0), Vector2(0, 0))
-	set0(4, 229, 14, "FRM_0818", Vector2(0, 370 - 100), Vector2(0, 370))
+		await set1(3, 194, 33, "EA22a", Vector2(131, 0), Vector2(306, 0), 163, Vector2(353, 194))
+	elif type == 8:
+		await set1(3, 194, 33, "EZ10", Vector2(131, 0), Vector2(306, 0), 194, Vector2(260, 0))
+	elif type == 9:
+		await set1(3, 194, 33, "EZ21d", Vector2(131, 0), Vector2(306, 0), 0, Vector2(0, 0))
+	await set1(2, 204, 14, "FRM_0920", Vector2(0, 0), Vector2(0, 0))
+	await set1(2, 214, 14, "FRM_0921", Vector2(0, 0), Vector2(0, 0))
+	set0(4, 224, 14, "FRM_0922", Vector2(0, 370 - 100), Vector2(0, 370))
 	if type == 4:
-		await set1(5, 229, 27, "EA03a", Vector2(0, 100), Vector2(0, 0), 0, Vector2(278, 195))
-	elif type == 3:
-		await set1(5, 229, 27, "EB16a", Vector2(0, 100), Vector2(0, 0), 59, Vector2(211, 261))
-	elif type == 2:
-		await set1(5, 229, 27, "EC13a", Vector2(0, 100), Vector2(0, 0), 0, Vector2(627, 134))
-	elif type == 5:
-		await set1(5, 229, 27, "ED16a", Vector2(0, 100), Vector2(0, 0), 0, Vector2(568, 0))
-	elif type == 6:
-		await set1(5, 229, 27, "EE07a", Vector2(0, 100), Vector2(0, 0), 75, Vector2(800, 30))
-	await set1(4, 242, 14, "FRM_0819", Vector2(0, 370))
-	set0(2, 255, 10, "FRM_0820", Vector2(494 - 100, 0), Vector2(494, 0))
+		await set1(5, 224, 23, "B46a", Vector2(0, 100), Vector2(0, 0), 183, Vector2(416, 135))
+	elif type == 8:
+		await set1(5, 224, 23, "B47a", Vector2(0, 100), Vector2(0, 0), 128, Vector2(407, 166))
+	elif type == 9:
+		await set1(5, 224, 23, "B23a", Vector2(0, 100), Vector2(0, 0), 150, Vector2(83, 169))
+	await set1(4, 234, 14, "FRM_0923", Vector2(0, 370))
 	if type == 4:
-		await set1(3, 255, 17, "EA04a", Vector2(100, 0), Vector2(0, 0), 109, Vector2(392, 290))
-	elif type == 3:
-		await set1(3, 255, 17, "EB06a", Vector2(100, 0), Vector2(0, 0), 110, Vector2(359, 0))
-	elif type == 2:
-		await set1(3, 255, 17, "EC07a", Vector2(100, 0), Vector2(0, 0), 150, Vector2(442, 302))
-	elif type == 5:
-		await set1(3, 255, 17, "ED03a", Vector2(100, 0), Vector2(0, 0), 239, Vector2(733, 0))
-	elif type == 6:
-		await set1(3, 255, 17, "EE08a", Vector2(100, 0), Vector2(0, 0), 132, Vector2(115, 0))
-	await set1(2, 265, 7, "FRM_0821", Vector2(494, 0))
+		await set1(6, 244, 27, "EA23a", Vector2(0, 0), Vector2(0, 0), 0, Vector2(400, 0))
+	elif type == 8:
+		await set1(6, 244, 27, "EZ11", Vector2(0, 0), Vector2(0, 0), 0, Vector2(538, 77))
+	elif type == 9:
+		await set1(6, 244, 27, "EZ24a", Vector2(0, 0), Vector2(0, 0), 0, Vector2(190, 0))
+	await set1(1, 244, 10, "FRM_0924", Vector2(-1, -1))
+	await set1(1, 254, 7, "FRM_0925", Vector2(-1, -1))
+	await set1(1, 264, 7, "FRM_0926", Vector2(-1, -1))
 	await set1(1, 272, 7, "FRM_0602", Vector2(-1, -1))
 	await set1(0, 280)
 	destroy_proc(true)

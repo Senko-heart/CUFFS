@@ -624,7 +624,8 @@ func title() -> GameAction:
 	spr_base.modulate.a = 0.0
 	add_child(spr_base)
 	var spr_logo: Control = title_skin.create_texture_rect("ID_FRM_0612")
-	if Start.yahiro:
+	var yahiro := FS.yahiro.is_open()
+	if yahiro:
 		var btn := ModButton.new()
 		btn.name = "ID_SWITCH"
 		btn.tex_normal = spr_logo.texture
@@ -635,7 +636,7 @@ func title() -> GameAction:
 	spr_logo.position = Vector2(223, 95)
 	add_child(spr_logo)
 	var spr_tg_logo: TextureRect
-	if Start.yahiro:
+	if yahiro:
 		spr_tg_logo = title_skin.create_texture_rect("ID_FRM_0614")
 		spr_tg_logo.modulate.a = 0.0
 		spr_tg_logo.position = Vector2(369, 171)
@@ -647,7 +648,7 @@ func title() -> GameAction:
 		spr_sub_logo.position = Vector2(511, 171)
 		add_child(spr_sub_logo)
 	var spr_tg_menu: TextureRect
-	if Start.yahiro:
+	if yahiro:
 		spr_tg_menu = title_skin.create_form_page("ID_PAGE_MENU_TG")
 		spr_tg_menu.modulate.a = 0.0
 		spr_tg_menu.position = Vector2(313, 324)

@@ -427,7 +427,6 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 	if not Global.is_load():
 		Global.sc_obj.in_select = false
 		Global.sc_obj.hitret_id = id
-		Global.sc_obj.add_jump_log()
 	if Global.is_load():
 		if (Global.sc_obj.in_select
 		or Global.sc_obj.hitret_id != id):
@@ -437,6 +436,8 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 		load_end = true
 	elif is_update():
 		await update_(flush)
+	if not Global.is_load() and not load_end:
+		Global.sc_obj.add_jump_log()
 	var voice_plays := false
 	var voice_found := FS.exists_voice(msg_info.voice)
 	var message := TranslationTable.mess(msg_info.message)

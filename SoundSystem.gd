@@ -21,7 +21,7 @@ func _stop_signal(snd: Sound, key_disable: bool = false) -> bool:
 		await get_tree().process_frame
 	return false
 
-func play_bgm(file: String, non_fade: bool = false) -> void:
+func play_bgm(file: String, non_fade: bool = false, start: float = 0.0) -> void:
 	file = file.to_upper()
 	if is_play_bgm():
 		if bgm[bgm_index].filename == file: return
@@ -36,12 +36,12 @@ func play_bgm(file: String, non_fade: bool = false) -> void:
 	if not non_fade:
 		bgm[bgm_index].volume_linear = 0.0
 		bgm[bgm_index].is_play = true
-		bgm[bgm_index].play()
+		bgm[bgm_index].play(start)
 		Anim.fade_vol(bgm[bgm_index], Global.cnf_obj.vol_bgm, 2.0)
 	else:
 		bgm[bgm_index].volume_linear = Global.cnf_obj.vol_bgm
 		bgm[bgm_index].is_play = true
-		bgm[bgm_index].play()
+		bgm[bgm_index].play(start)
 
 func stop_bgm(non_fade: bool = false, config_stop: bool = false) -> void:
 	print("BGM-STOP")
@@ -76,6 +76,9 @@ func get_play_bgm_name() -> String:
 
 func set_bgm_info(info: Sound) -> void:
 	if info.filename == "BGM01":
+		info.end_pos = -1
+		info.rewind_pos = -1
+	elif info.filename == "BGM01_OFF":
 		info.end_pos = -1
 		info.rewind_pos = -1
 	elif info.filename == "BGM02":
@@ -141,6 +144,21 @@ func set_bgm_info(info: Sound) -> void:
 	elif info.filename == "BGM21":
 		info.end_pos = 6787583
 		info.rewind_pos = 22075
+	elif info.filename == "BGM22_S":
+		info.end_pos = -1
+		info.rewind_pos = -1
+	elif info.filename == "BGM_SORA":
+		info.end_pos = -1
+		info.rewind_pos = -1
+	elif info.filename == "BGM_AKIRA":
+		info.end_pos = -1
+		info.rewind_pos = -1
+	elif info.filename == "BGM_KAZUHA":
+		info.end_pos = -1
+		info.rewind_pos = -1
+	elif info.filename == "BGM_MOTOKA":
+		info.end_pos = -1
+		info.rewind_pos = -1
 
 func bgm_release() -> void:
 	bgm[0].stream = null

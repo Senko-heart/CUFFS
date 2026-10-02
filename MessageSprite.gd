@@ -57,9 +57,11 @@ func set_default_msg_speed(
 	char_fade_delta = float(fade_speed) / 1000.0
 	char_show_ratio = float(speed_ratio) / 256.0
 
-func cursor_pos() -> Vector2:
+func cursor_pos(width: float = 0.0) -> Vector2:
 	var line := get_line_count() - 1
 	if line < 0: return Vector2()
 	var x := get_line_width(line)
+	if x + width > size.x:
+		return Vector2(0, get_line_offset(line + 1))
 	var y := get_line_offset(line)
 	return Vector2(x, y)

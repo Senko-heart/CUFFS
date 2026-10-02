@@ -234,7 +234,7 @@ func step() -> StepResult:
 	elif fn == &"WindowView":
 		window_view.callv(reshape(args, 0))
 	elif fn == &"ScPlayBgm":
-		sc_play_bgm.callv(reshape(args, "", 0))
+		sc_play_bgm.callv(reshape(args, "", 0, 0))
 	elif fn == &"ScStopBgm":
 		sc_stop_bgm.callv(reshape(args, 0))
 	elif fn == &"ScPauseBgm":
@@ -497,10 +497,10 @@ func clear() -> void:
 func window_view(type: int) -> void:
 	Global.adv.message_view(type)
 
-func sc_play_bgm(file: String, non_fade: int) -> void:
+func sc_play_bgm(file: String, non_fade: int, start: int) -> void:
 	if Global.is_load():
 		return
-	SoundSystem.play_bgm(file, non_fade != 0)
+	SoundSystem.play_bgm(file, non_fade != 0, start)
 
 func sc_stop_bgm(non_fade: int) -> void:
 	if Global.is_load():
@@ -643,10 +643,5 @@ func zoom(
 
 func sc_play_movie(file: String) -> void:
 	Global.destroy_adv_screen()
-	if Global.cnf_obj.play_bgm:
-		Global.set_volume(Global.cnf_obj.vol_bgm * 0.75)
-	else:
-		Global.set_volume(0.0)
 	await Global.play_movie(file + ".ogv")
-	Global.set_volume(0.75)
 	Global.setup_adv_screen()

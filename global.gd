@@ -4,8 +4,6 @@ const ScreenType := ConfigDataBase.ScreenType
 const ScreenEffect := ConfigDataBase.ScreenEffect
 const StepResult := GssInterpreter.StepResult
 const TimeZone := CgInfo.TimeZone
-var TRIAL := false
-var TECHGIAN := false
 const SAVE_NUM := 99
 const GAS := 10000
 
@@ -97,6 +95,8 @@ var confirm_prompt: Dictionary[StringName, String] = {
 }
 
 var FRM_0414: Texture2D
+var MESS_X := 684
+var BLINK_WIDTH := 0.0
 
 func _init() -> void:
 	sc_objects.resize(SAVE_NUM)
@@ -106,6 +106,9 @@ func _init() -> void:
 
 func _ready() -> void:
 	await FS.sync()
+	if not FS.patch.is_open():
+		MESS_X = 696
+		BLINK_WIDTH = 24.0
 	TranslationTable.initialize()
 	load_system_data()
 	load_config_data()
@@ -531,7 +534,7 @@ func is_recollect_mode() -> bool:
 	return recollect_mode
 
 func is_saveable() -> bool:
-	return not recollect_mode and not TECHGIAN
+	return not recollect_mode
 
 func enter_recollect_mode() -> void:
 	recollect_mode = true

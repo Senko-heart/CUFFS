@@ -1,6 +1,6 @@
 extends Node
 
-var line_joiner := ""
+var line_joiner := "\n"
 
 var name_tbl: Dictionary[String, String]
 var mess_tbl: Dictionary[int, PackedStringArray] = {}

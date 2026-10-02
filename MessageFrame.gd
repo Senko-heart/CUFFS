@@ -49,7 +49,7 @@ func _init() -> void:
 	mspr_name.add_theme_constant_override(&"outline_size", 4)
 	mspr_mess.add_theme_constant_override(&"shadow_outline_size", 2)
 	mspr_name.set_default_msg_speed(0, 0, 256)
-	mspr_mess.create_message(684, 90)
+	mspr_mess.create_message(Global.MESS_X, 90)
 	mspr_mess.attach_message_style(Global.frame_skin, &"ID_FONT_MESSAGE")
 	mspr_mess.position = Vector2(39, 40)
 	mspr_mess.add_theme_constant_override(&"outline_size", 2)
@@ -173,7 +173,7 @@ func get_view() -> int:
 
 func show_blink() -> void:
 	is_shown_blink_hit = true
-	var pos := mspr_mess.position + mspr_mess.cursor_pos()
+	var pos := mspr_mess.position + mspr_mess.cursor_pos(Global.BLINK_WIDTH)
 	spr_blink.position = pos
 	if Global.cnf_obj.screen_effect == ScreenEffect.Normal:
 		await Anim.fade(spr_blink, 1.0, 0.5)

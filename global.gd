@@ -146,7 +146,7 @@ func _notification(what: int) -> void:
 		if in_movie:
 			Input.action_press("hit_cancel")
 			Input.action_release("hit_cancel")
-		else:
+		elif not is_confirm():
 			await ask_game_exit()
 	elif what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		Input.action_press("hit_cancel")

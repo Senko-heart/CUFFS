@@ -1082,6 +1082,7 @@ func quick_load() -> void:
 func quick_save() -> void:
 	print("Save:QSave")
 	await save("QSave.sav", false)
+	play_sys_voice("クイックセーブしました")
 	await confirm(confirm_prompt.qsave, false)
 
 func is_load() -> bool:
@@ -1096,7 +1097,7 @@ func enter_load() -> void:
 	adv.spr_select.clear()
 	adv.msg_info.clear()
 
-func leave_load() -> void:
+func leave_load() -> bool:
 	sc_obj.is_load = false
 	adv.flush_update()
 	if sc_obj.play_bgm != &"":
@@ -1131,11 +1132,15 @@ func leave_load() -> void:
 	adv.bustup_clear(0)
 	for bu in sc_obj.bustup:
 		if bu.status != 0:
-			var pos := bu.pos if bu.pos_fix else -bu.pos
-			adv.set_bustup_(bu.filename, pos, bu.priority)
-			var mv := bu.local_position.y - bu.base_position.y
-			if mv != 0:
-				adv.bustup_down(bu.id, mv, 0, 0)
+			if bu.center == 1:
+				var pos := bu.pos if bu.pos_fix else -bu.pos
+				adv.set_bustup_(bu.filename, pos, bu.priority)
+				var mv := bu.local_position.y - bu.base_position.y
+				if mv != 0:
+					adv.bustup_down(bu.id, mv, 0, 0)
+			elif bu.center == 2:
+				adv.set_bustup_details(bu.basename, bu.id,
+						bu.local_position.x, bu.local_position.y, bu.priority)
 	if sc_obj.zoom:
 		var param := sc_obj.zoom_param
 		adv.zoom_(param.pt.x, param.pt.y, param.size.x, param.size.y)
@@ -1146,6 +1151,8 @@ func leave_load() -> void:
 	if sc_obj.voice_log.nth_back(0) != &"":
 		if check_play_voice(names.true_name):
 			SoundSystem.play_voice(sc_obj.voice_log.nth_back(0))
+			return true
+	return false
 
 func show_load_effect() -> void:
 	var blender := Blender.new(Blender.Mode.InvertAlpha)

@@ -50,7 +50,6 @@ var select_result := 0
 var select := false
 var select_item: PackedInt32Array = []
 var spr_select: Array[Control] = []
-var talk_type := 0
 var skip := false
 var auto_mode := false
 var tone_filter := false
@@ -172,9 +171,6 @@ func compute_automode_times(message: String) -> void:
 func name_(string: String, voice: String) -> void:
 	msg_info.name = string
 	msg_info.voice = voice
-	if string in [&"", &"心の声", &"語り"]:
-		talk_type = 0
-	else: talk_type = 1
 
 func mess(id: int) -> void:
 	msg_info.message = id
@@ -219,8 +215,8 @@ func bustup_jump(id: int, mv: int, mh: int) -> void:
 	bustup_man.jump(id, mv, mh)
 	update = true
 
-func bustup_shake(id: int, mv: int, mh: int) -> void:
-	bustup_man.shake(id, mv, mh)
+func bustup_shake(id: int, mw: int, mh: int) -> void:
+	bustup_man.shake(id, mw, mh)
 	update = true
 
 func set_cg_(filename: String, x: int = 0, y: int = 0, _w: int = 0, _h: int = 0) -> void:
@@ -266,6 +262,9 @@ func update_(flush: bool, wait: bool = false) -> void:
 			var nonleave := info.status != 128
 			var dumbu := dummy_bu[i] if nonleave else dummy_bu_leave[i]
 			bustup_man.copy_spr_at(i, dumbu)
+		if trans_info.type.begins_with("SLIDE_CG"):
+			for dumbu in dummy_bu:
+				dumbu.texture = null
 		dummy_view.size = get_viewport().size
 		dummy_view.render_target_update_mode = SubViewport.UPDATE_ONCE
 		await RenderingServer.frame_post_draw
@@ -904,25 +903,30 @@ func enable_key_update_flush(enable: bool) -> void:
 
 func action_jump(id: int) -> void:
 	var spr: Sprite2D = null
+	var param: MoveParam
 	for i in range(bustup_man.info.size()):
 		if bustup_man.info[i].id == id:
 			spr = bustup_man.spr[i]
+			param = bustup_man.info[i].jump_param
 			break
 	if not spr: return
 	var pos := spr.position
-	var w := Vector2(0, 25)
-	await Anim.move(spr, pos - w, 0.2)
+	var w := param.pt * Vector2i(-1, 1)
+	if w.y == 0: w.y = 25
+	await Anim.move(spr, pos - Vector2(w), 0.2)
 	await Anim.move(spr, pos, 0.2)
 
 func action_shake(id: int) -> void:
 	var spr: Sprite2D = null
+	var param: MoveParam
 	for i in range(bustup_man.info.size()):
 		if bustup_man.info[i].id == id:
 			spr = bustup_man.spr[i]
+			param = bustup_man.info[i].shake_param
 			break
 	if not spr: return
 	var pos := spr.position
-	var w := Vector2(25, 0)
+	var w := Vector2(25 if param.pt.x == 0 else param.pt.x, 0)
 	await Anim.move(spr, pos - w, 0.03)
 	for i in range(1, -1, -1):
 		await Anim.move(spr, pos + w, 0.03)

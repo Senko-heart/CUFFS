@@ -471,10 +471,10 @@ func jump(id: int, mv: int, mh: int) -> void:
 		return
 	Global.adv.bustup_jump(id, mv, mh)
 
-func shake(id: int, mv: int, mh: int) -> void:
+func shake(id: int, mw: int, mh: int) -> void:
 	if Global.is_load():
 		return
-	Global.adv.bustup_shake(id, mv, mh)
+	Global.adv.bustup_shake(id, mw, mh)
 
 func update(flush: int) -> void:
 	if Global.is_load():

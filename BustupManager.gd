@@ -157,14 +157,14 @@ func jump(id: int, mv: int = 0, mh: int = 0) -> void:
 	for bu in info:
 		if bu.id == id:
 			bu.status = 32
-			bu.jump_param.pt = Vector2i(mv, mh)
+			bu.jump_param.pt = Vector2i(mh, mv)
 			return
 
-func shake(id: int, mv: int = 0, mh: int = 0) -> void:
+func shake(id: int, mw: int = 0, mh: int = 0) -> void:
 	for bu in info:
 		if bu.id == id:
 			bu.status = 64
-			bu.shake_param.pt = Vector2i(mv, mh)
+			bu.shake_param.pt = Vector2i(mw, mh)
 			return
 
 func num_people() -> int:

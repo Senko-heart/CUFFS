@@ -209,6 +209,8 @@ func step() -> StepResult:
 		set_cg_rgb.callv(reshape(args, 0, 0, 0))
 	elif fn == &"SetBustup":
 		set_bustup.callv(reshape(args, "", 0, 0))
+	elif fn == &"SetSprite":
+		set_sprite.callv(reshape(args, "", 0, 0, 0, 0))
 	elif fn == &"BustupMove":
 		bustup_move.callv(reshape(args, 0, 0))
 	elif fn == &"BustupClear":
@@ -218,9 +220,9 @@ func step() -> StepResult:
 	elif fn == &"Down":
 		down.callv(reshape(args, 0, 0, 0, 0))
 	elif fn == &"Jump":
-		jump.callv(reshape(args, 0))
+		jump.callv(reshape(args, 0, 0, 0))
 	elif fn == &"Shake":
-		shake.callv(reshape(args, 0))
+		shake.callv(reshape(args, 0, 0, 0))
 	elif fn == &"Update":
 		await update.callv(reshape(args, 0))
 	elif fn == &"EnableKeyUpdateFlush":
@@ -439,6 +441,11 @@ func set_bustup(bu: String, pos: int, priority: int) -> void:
 		return
 	Global.adv.set_bustup_(bu, pos, priority)
 
+func set_sprite(bu: String, id: int, x: int, y: int, priority: int) -> void:
+	if Global.is_load():
+		return
+	Global.adv.set_bustup_details(bu, id, x, y, priority)
+
 func bustup_move(id: int, pos: int) -> void:
 	if Global.is_load():
 		return
@@ -459,15 +466,15 @@ func down(id: int, mv: int, time: int, accel: int) -> void:
 		return
 	Global.adv.bustup_down(id, mv, time, accel)
 
-func jump(id: int) -> void:
+func jump(id: int, mv: int, mh: int) -> void:
 	if Global.is_load():
 		return
-	Global.adv.bustup_jump(id)
+	Global.adv.bustup_jump(id, mv, mh)
 
-func shake(id: int) -> void:
+func shake(id: int, mv: int, mh: int) -> void:
 	if Global.is_load():
 		return
-	Global.adv.bustup_shake(id)
+	Global.adv.bustup_shake(id, mv, mh)
 
 func update(flush: int) -> void:
 	if Global.is_load():

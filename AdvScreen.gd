@@ -185,6 +185,12 @@ func set_bustup_(filename: String, pos: int, priority: int) -> void:
 	set_bustup = true
 	update = true
 
+func set_bustup_details(filename: String, id: int, x: int, y: int, priority: int) -> void:
+	print("Char-%s" % filename)
+	bustup_man.set_details(id, Vector2i(x, y), -1, 2, 0, priority, filename, filename)
+	set_bustup = true
+	update = true
+
 func bustup_move(id: int, pos: int) -> void:
 	bustup_man.move(id, pos)
 	set_bustup = true
@@ -209,12 +215,12 @@ func bustup_down(id: int, mv: int, time: int, accel: int) -> void:
 	bustup_man.down(id, mv, time, accel)
 	update = true
 
-func bustup_jump(id: int) -> void:
-	bustup_man.jump(id)
+func bustup_jump(id: int, mv: int, mh: int) -> void:
+	bustup_man.jump(id, mv, mh)
 	update = true
 
-func bustup_shake(id: int) -> void:
-	bustup_man.shake(id)
+func bustup_shake(id: int, mv: int, mh: int) -> void:
+	bustup_man.shake(id, mv, mh)
 	update = true
 
 func set_cg_(filename: String, x: int = 0, y: int = 0, _w: int = 0, _h: int = 0) -> void:
@@ -866,10 +872,12 @@ func load_bustup(spr: Sprite2D, info: BustupInfo) -> void:
 			else:
 				bu_texture.set_frame(randi_range(0, bu_texture.frame_count))
 		spr.texture = bu_texture
-		spr.offset = -spr.texture.get_size()
-		spr.offset.x = floorf(0.5 * spr.offset.x)
-		spr.offset.y += 50
-		#spr.modulate.a = 0.0
+		if info.center == 1:
+			spr.offset = -spr.texture.get_size()
+			spr.offset.x = floorf(0.5 * spr.offset.x)
+			spr.offset.y += 50
+		elif info.center == 2:
+			spr.offset = Vector2.ZERO
 
 func create_color_texture(
 	spr: Sprite2D,

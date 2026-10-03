@@ -28,6 +28,44 @@ func clear_at(i: int) -> void:
 	spr[i].texture = null
 	spr[i].material = null
 
+func set_details(
+	id: int, pos: Vector2i, pos_fix: int, center: int,
+	relation: int, priority: int,
+	basename: String, filename: String
+) -> void:
+	for bu in info:
+		if bu.id != id: continue
+		if bu.status not in [16, 32, 64]:
+			bu.status = 4
+		bu.id = id
+		bu.pos_fix = pos_fix
+		if center == 1:
+			bu.base_position = Vector2i(0, 600)
+		elif center == 2:
+			bu.base_position = Vector2i.ZERO
+		bu.center = center
+		bu.relation = relation
+		bu.priority = priority
+		bu.basename = basename
+		bu.filename = filename
+		return
+	for bu in info:
+		if bu.status != 0: continue
+		bu.status = 1
+		bu.id = id
+		bu.pos_fix = pos_fix
+		if center == 1:
+			bu.base_position = Vector2i(0, 600)
+		elif center == 2:
+			bu.base_position = Vector2i.ZERO
+		bu.local_position = pos
+		bu.center = center
+		bu.relation = relation
+		bu.priority = priority
+		bu.basename = basename
+		bu.filename = filename
+		return
+
 func set_(filename: String, pos: int, priority: int, timezone: int) -> void:
 	var bustup := Global.check_setup_bustup(filename, timezone)
 	for bu in info:
@@ -41,6 +79,7 @@ func set_(filename: String, pos: int, priority: int, timezone: int) -> void:
 			bu.pos_fix = pos > 0
 		bu.relation = bustup.relation
 		if priority != 0: bu.priority = priority
+		bu.center = 1
 		bu.base_position = bustup.base_position
 		return
 	for bu in info:
@@ -55,6 +94,7 @@ func set_(filename: String, pos: int, priority: int, timezone: int) -> void:
 		bu.relation = bustup.relation
 		if priority != 0: bu.priority = priority
 		else: bu.priority = bustup.priority
+		bu.center = 1
 		bu.base_position = bustup.base_position
 		bu.local_position = bustup.base_position
 		return
@@ -113,16 +153,18 @@ func down(id: int, mv: int, time: int, accel: int) -> void:
 		bu.down_param.set_(Vector2i(0, i_mv), i_time, i_accel, false)
 		return
 
-func jump(id: int, _mv: int = 0) -> void:
+func jump(id: int, mv: int = 0, mh: int = 0) -> void:
 	for bu in info:
 		if bu.id == id:
 			bu.status = 32
+			bu.jump_param.pt = Vector2i(mv, mh)
 			return
 
-func shake(id: int, _mh: int = 0, _count: int = 0) -> void:
+func shake(id: int, mv: int = 0, mh: int = 0) -> void:
 	for bu in info:
 		if bu.id == id:
 			bu.status = 64
+			bu.shake_param.pt = Vector2i(mv, mh)
 			return
 
 func num_people() -> int:
@@ -186,6 +228,7 @@ func adjust_position() -> void:
 
 func adjust_spr_position(id: int) -> void:
 	var bu := info[id]
-	bu.base_position.x = BUSTUP_XPOS[bu.pos]
-	bu.local_position.x = bu.base_position.x
+	if bu.center == 1:
+		bu.base_position.x = BUSTUP_XPOS[bu.pos]
+		bu.local_position.x = bu.base_position.x
 	spr[id].position = bu.local_position

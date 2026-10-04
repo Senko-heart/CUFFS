@@ -112,8 +112,9 @@ func _show() -> void:
 	_hide_scroll()
 	Anim.fade(spr_base, 1.0, 0.5)
 
-func _hide() -> void:
-	await Anim.fade(spr_base, 0.0, 0.5)
+func _hide(wait: bool = false) -> void:
+	Anim.fade(spr_base, 0.0, 0.5)
+	if wait: await Anim.finish_flushed(spr_base)
 
 func _hide_scroll(time: float = 0.3) -> void:
 	await Anim.fade(spr_scroll, 0.0, time)
@@ -1351,7 +1352,7 @@ func start_recollect(scenario: String) -> void:
 	Global.adv.set_cg_("BLACK")
 	Global.adv.bustup_clear(0)
 	await Global.adv.update_(true)
-	await _hide()
+	await _hide(true)
 	mini_destroy()
 	Global.cnf_obj.play_bgm = cnf_play_bgm
 	Global.sc_obj = ScenarioObject.new()
@@ -1477,6 +1478,6 @@ func run() -> void:
 	Global.adv.bustup_clear(0)
 	await Global.adv.update_(true)
 	Global.destroy_adv_screen()
-	await _hide()
+	await _hide(true)
 	SoundSystem.stop_bgm(true)
 	Global.cnf_obj.play_bgm = cnf_play_bgm

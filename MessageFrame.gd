@@ -135,7 +135,7 @@ func _show(flush: bool = false) -> void:
 	else:
 		Anim.schedule_scale(self, Vector2(0.95, 0.95), Vector2.ONE)
 		Anim.schedule_fade(self, 1.0)
-		await Anim.run(0.3)
+		await Anim.run(0.3, [], true)
 	if modulate.a == 1.0:
 		is_show = true
 
@@ -146,7 +146,8 @@ func _hide(flush: bool = false) -> void:
 	if _skip_animation(flush):
 		modulate.a = 0.0
 	else:
-		await Anim.fade(self, 0.0, 0.3)
+		Anim.fade(self, 0.0, 0.3)
+		await Anim.finish_flushed(self)
 	if modulate.a == 0.0:
 		hide()
 		is_show = false

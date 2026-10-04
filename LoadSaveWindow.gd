@@ -74,7 +74,7 @@ func _show() -> void:
 	if Global.cnf_obj.screen_effect == ScreenEffect.Normal:
 		Anim.schedule_scale(spr_frame, Vector2(0.95, 0.95), Vector2.ONE)
 		Anim.schedule_fade(spr_frame, 1.0)
-		await Anim.run(0.3)
+		Anim.run(0.3)
 	else:
 		Anim.kill(spr_frame)
 		spr_frame.modulate.a = 1.0
@@ -83,7 +83,7 @@ func _hide() -> void:
 	if Global.cnf_obj.screen_effect == ScreenEffect.Normal:
 		Anim.schedule_scale(spr_frame, Vector2.ONE, Vector2(0.95, 0.95))
 		Anim.schedule_fade(spr_frame, 0.0)
-		await Anim.run(0.3)
+		await Anim.run(0.3, [], true)
 	else:
 		Anim.kill(spr_frame)
 		spr_frame.modulate.a = 0.0

@@ -16,9 +16,9 @@ func _stop_signal(snd: Sound, key_disable: bool = false) -> bool:
 			await snd.finished
 		return false
 	while snd.playing:
+		await get_tree().process_frame
 		if Input.is_action_just_pressed("hit", true):
 			return true
-		await get_tree().process_frame
 	return false
 
 func play_bgm(file: String, non_fade: bool = false, start: float = 0.0) -> void:

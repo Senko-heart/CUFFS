@@ -667,7 +667,9 @@ func logo() -> void:
 	add_child(spr_base)
 	Anim.fade(spr_base, 1.0, 1.0)
 	var spr_logo: TextureRect
-	var cancel := await hit_wait(1.0)
+	var cancel := await Anim.finish_flushed(spr_base)
+	if not cancel:
+		cancel = await hit_wait(1.0)
 	if not cancel:
 		play_sys_voice("ブランドコール")
 		spr_logo = title_skin.create_texture_rect("ID_FRM_0602")
@@ -679,7 +681,7 @@ func logo() -> void:
 	if not cancel:
 		Anim.schedule_fade(spr_base, 0.0)
 		Anim.schedule_fade(spr_logo, 0.0)
-		await Anim.run(1.0)
+		await Anim.run(1.0, [], true)
 	if spr_logo: Anim.destroy(spr_logo)
 	Anim.destroy(spr_base)
 
@@ -860,20 +862,20 @@ func title(state: Menu) -> GameAction:
 			spr_ss_title.texture = FS.load_texture("SS_KARAOKE")
 		spr_ss_title.modulate.a = 0.0
 		add_child(spr_ss_title)
-		await Anim.fade(spr_ss_title, 1.0, 2.0)
-		Anim.fade(spr_ss_menu, 0.0, 0.5)
+		Anim.fade(spr_ss_title, 1.0, 2.0)
+		await Anim.finish_flushed(spr_ss_title)
 	elif state == Menu.Web:
 		Anim.fade(spr_web_menu, 0.0, 0.5)
 		Anim.schedule_fade(mspr_version, 0.0)
 		Anim.schedule_fade(spr_logo, 0.0)
 		Anim.schedule_fade(spr_base, 0.0)
-		await Anim.run(time)
+		await Anim.run(time, [], true)
 	else:
 		Anim.fade(spr_top_menu, 0.0, 0.5)
 		Anim.schedule_fade(mspr_version, 0.0)
 		Anim.schedule_fade(spr_logo, 0.0)
 		Anim.schedule_fade(spr_base, 0.0)
-		await Anim.run(time)
+		await Anim.run(time, [], true)
 	Anim.destroy(spr_base)
 	Anim.destroy(spr_logo)
 	Anim.destroy(spr_top_menu)
@@ -885,7 +887,8 @@ func title(state: Menu) -> GameAction:
 		if not cancel:
 			cancel = await hit_wait(3.0)
 		if not cancel:
-			await Anim.fade(spr_ss_title, 0.0, 2.0)
+			Anim.fade(spr_ss_title, 0.0, 2.0)
+			await Anim.finish_flushed(spr_ss_title)
 		SoundSystem.stop_sys_se()
 	elif state == Menu.Web:
 		await SoundSystem.wait_sys_se()
@@ -912,7 +915,8 @@ func attention() -> void:
 	if not cancel:
 		cancel = await hit_wait(3.0)
 	if not cancel:
-		await Anim.fade(spr_attention, 0.0, 3.0)
+		Anim.fade(spr_attention, 0.0, 3.0)
+		await Anim.finish_flushed(spr_attention)
 	Anim.destroy(spr_attention)
 	attention_given = true
 

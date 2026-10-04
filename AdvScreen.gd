@@ -410,7 +410,7 @@ func update_(flush: bool, wait: bool = false) -> void:
 
 func wait_update(_flush: bool = false) -> void:
 	if updating:
-		await Anim.finish(trans_base)
+		await Anim.finish_flushed(trans_base)
 		flush_update()
 
 func flush_update() -> void:
@@ -497,12 +497,17 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 		or Input.is_action_just_pressed("hit_cancel") \
 		or Input.is_action_just_pressed("hide_adv"):
 			if not is_auto_mode():
+				await get_tree().process_frame
 				if msg_frame.is_show:
 					await msg_frame._hide()
-					await Global.test_hitret()
+					while not Input.is_action_just_pressed("hit", true) \
+					and not Input.is_action_just_pressed("hide_adv"):
+						await get_tree().process_frame
 					await msg_frame._show()
 				else:
-					await Global.test_hitret()
+					while not Input.is_action_just_pressed("hit", true) \
+					and not Input.is_action_just_pressed("hide_adv"):
+						await get_tree().process_frame
 			else:
 				auto_mode_(false)
 		elif cid == "ID_SKIP" \
@@ -523,6 +528,7 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 		or Input.is_action_just_pressed("quick_load"):
 			if Global.is_saveable() and Global.sc_obj_qsave:
 				msg_frame.enable(false)
+				Global.play_sys_voice("クイックロード確認")
 				if await Global.confirm(Global.confirm_prompt.qload):
 					await Global.quick_load()
 					msg_frame.enable(true)
@@ -668,14 +674,19 @@ func start_select() -> GameLogic:
 			elif is_skip():
 				skip_(false)
 			else:
+				await get_tree().process_frame
 				hide_select_item()
 				if msg_frame.is_show:
 					await msg_frame._hide()
-					await Global.test_hitret()
+					while not Input.is_action_just_pressed("hit", true) \
+					and not Input.is_action_just_pressed("hide_adv"):
+						await get_tree().process_frame
 					show_select_item()
 					await msg_frame._show()
 				else:
-					await Global.test_hitret()
+					while not Input.is_action_just_pressed("hit", true) \
+					and not Input.is_action_just_pressed("hide_adv"):
+						await get_tree().process_frame
 					show_select_item()
 		elif cid == "ID_SKIP" \
 		or Input.is_action_just_pressed("skip"):
@@ -691,6 +702,7 @@ func start_select() -> GameLogic:
 		or Input.is_action_just_pressed("quick_load"):
 			if Global.is_saveable() and Global.sc_obj_qsave:
 				msg_frame.enable(false)
+				Global.play_sys_voice("クイックロード確認")
 				if await Global.confirm(Global.confirm_prompt.qload):
 					await Global.quick_load()
 					msg_frame.enable(true)
@@ -991,7 +1003,7 @@ func scroll_(x: int, y: int, time: int, accel: int) -> void:
 		or is_skip() or Input.is_action_pressed("fast_forward")):
 			Anim.flush(spr_cg)
 		else:
-			await Anim.finish(spr_cg)
+			await Anim.finish_flushed(spr_cg)
 		cg.pt = Vector2i(x, y)
 	else:
 		update = true
@@ -1002,7 +1014,7 @@ func wait_scroll() -> void:
 	if is_skip() or Input.is_action_pressed("fast_forward"):
 		Anim.flush(spr_cg)
 	else:
-		await Anim.finish(spr_cg)
+		await Anim.finish_flushed(spr_cg)
 
 func zoom_(cx: int, cy: int, w: int, h: int, time: int = 0, accel: int = 0) -> void:
 	zoom_param.set_(cx, cy, w, h, time, accel)

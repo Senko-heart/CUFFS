@@ -57,7 +57,7 @@ func _process(delta: float) -> void:
 func schedule(target: Node, anim: Dictionary) -> void:
 	queue.get_or_add(target, {}).merge(anim, true)
 
-func run(time: float, select: Array[Node] = []) -> void:
+func run(time: float, select: Array[Node] = [], enable_skip: bool = false) -> bool:
 	if select.is_empty():
 		for target in queue:
 			var q := queue[target]
@@ -70,8 +70,21 @@ func run(time: float, select: Array[Node] = []) -> void:
 				var q := queue[target]
 				queue.erase(target)
 				run_single(target, q, time)
-	for target in select:
-		await safe_finish(target)
+	if enable_skip:
+		for target in select:
+			while is_instance_valid(target) and target in active:
+				await get_tree().process_frame
+				if Input.is_action_just_pressed("hit_confirm", true):
+					for flush_target in select:
+						if is_instance_valid(target):
+							Anim.flush(flush_target)
+					await get_tree().process_frame
+					return true
+	else:
+		for target in select:
+			if is_instance_valid(target):
+				await finish(target)
+	return false
 
 func run_single(node: Node, q: Dictionary, time: float) -> void:
 	var anim := {duration = time, elapsed = 0.0}
@@ -109,24 +122,22 @@ func run_single(node: Node, q: Dictionary, time: float) -> void:
 		anim.property = path
 	kill(node)
 	active[node] = anim
-	await safe_finish(node)
+	await finish(node)
 
 func is_animated(target: Node) -> bool:
 	return target in active
 
-func safe_finish(target: Node) -> void:
+func finish(target: Node) -> void:
 	while is_instance_valid(target) and target in active:
 		await get_tree().process_frame
 
-func finish(target: Node) -> void:
-	while target in active:
-		await get_tree().process_frame
-
 func finish_flushed(target: Node) -> bool:
-	while target in active:
-		if Input.is_action_just_pressed("hit_confirm", true):
-			return true
+	while is_instance_valid(target) and target in active:
 		await get_tree().process_frame
+		if Input.is_action_just_pressed("hit_confirm", true):
+			Anim.flush(target)
+			await get_tree().process_frame
+			return true
 	return false
 
 func flush(target: Node) -> void:

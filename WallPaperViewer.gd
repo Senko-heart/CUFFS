@@ -107,7 +107,8 @@ func run() -> void:
 	if Global.cnf_obj.screen_effect != ScreenEffect.Normal:
 		modulate.a = 0.0
 	else:
-		await Anim.fade(self, 0.0, 0.5)
+		Anim.fade(self, 0.0, 0.5)
+		await Anim.finish_flushed(self)
 	SoundSystem.stop_bgm()
 	FS.cache_reset(&"")
 	queue_free()

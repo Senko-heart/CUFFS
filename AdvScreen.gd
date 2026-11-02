@@ -262,9 +262,6 @@ func update_(flush: bool, wait: bool = false) -> void:
 			var nonleave := info.status != 128
 			var dumbu := dummy_bu[i] if nonleave else dummy_bu_leave[i]
 			bustup_man.copy_spr_at(i, dumbu)
-		if trans_info.type.begins_with("SLIDE_CG"):
-			for dumbu in dummy_bu:
-				dumbu.texture = null
 		dummy_view.size = get_viewport().size
 		dummy_view.render_target_update_mode = SubViewport.UPDATE_ONCE
 		await RenderingServer.frame_post_draw
@@ -353,7 +350,25 @@ func update_(flush: bool, wait: bool = false) -> void:
 				if info.leave_param.fade:
 					spr.modulate.a = 0.0
 	if not flush:
-		if transition and trans_info.type != &"":
+		var is_slide := false
+		if transition and trans_info.type.begins_with(&"SLIDE"):
+			is_slide = true
+			var slide: Vector2
+			if &"_L" in trans_info.type:
+				slide = Vector2(-Global.screen_size.x, 0)
+			elif &"_R" in trans_info.type:
+				slide = Vector2(Global.screen_size.x, 0)
+			elif &"_T" in trans_info.type:
+				slide = Vector2(0, -Global.screen_size.y)
+			elif &"_B" in trans_info.type:
+				slide = Vector2(0, Global.screen_size.y)
+			Anim.flush(adv_base)
+			Anim.flush(trans_base)
+			adv_base.position = -slide
+			trans_base.position = Vector2.ZERO
+			Anim.schedule_move(adv_base, Vector2.ZERO, Vector2(2.0, 0.0))
+			Anim.schedule_move(trans_base, slide, Vector2(2.0, 0.0))
+		elif transition and trans_info.type != &"":
 			var alpha_image := FS.load_mask_image(trans_info.type)
 			trans_mat.alpha_texture = ImageTexture.create_from_image(alpha_image)
 			trans_mat.r = 8.0
@@ -365,7 +380,10 @@ func update_(flush: bool, wait: bool = false) -> void:
 		# This causes lag frames to not be displayed
 		# due to the large delta processing time.
 		await RenderingServer.frame_pre_draw
-		Anim.property(trans_base, "material:t", activation_wait)
+		if is_slide:
+			Anim.run(activation_wait)
+		else:
+			Anim.property(trans_base, "material:t", activation_wait)
 		if scroll:
 			Anim.flush(spr_cg)
 			Anim.run_single(spr_cg, {
@@ -417,6 +435,7 @@ func flush_update() -> void:
 	if updating:
 		trans_base.hide()
 		Anim.kill(trans_base)
+		trans_base.position = Vector2.ZERO
 		trans_mat.alpha_texture = null
 		trans_mat.t = 0.0
 		dummy_cg.texture = null
@@ -429,6 +448,7 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 	var ret := GameLogic.Unaffected
 	var flush := is_skip() or Input.is_action_pressed("fast_forward")
 	var load_end := false
+	var voice_plays := false
 	if not Global.is_load():
 		Global.sc_obj.in_select = false
 		Global.sc_obj.hitret_id = id
@@ -437,13 +457,12 @@ func hitret(id: int, voice_wait: int) -> GameLogic:
 		or Global.sc_obj.hitret_id != id):
 			msg_info.clear()
 			return GameLogic.Unaffected
-		Global.leave_load()
+		voice_plays = await Global.leave_load()
 		load_end = true
 	elif is_update():
 		await update_(flush)
 	if not Global.is_load() and not load_end:
 		Global.sc_obj.add_jump_log()
-	var voice_plays := false
 	var voice_found := FS.exists_voice(msg_info.voice)
 	var message := TranslationTable.mess(msg_info.message)
 	var packs := Global.adjust_message(message)

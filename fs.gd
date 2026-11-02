@@ -131,6 +131,8 @@ func _init_fast_path(uri: String) -> void:
 	var savepath := uri + "#save"
 	if savepath in dir_id:
 		_scan_directory(tree_uri, dir_id[savepath], savepath + "/", fast_path)
+	else:
+		_mkdir(tree_uri, document_id, uri + "#", "save")
 
 func _scan_directory(
 	tree_uri: JavaObject,
@@ -152,8 +154,22 @@ func _scan_directory(
 		else:
 			var file_uri: JavaObject = DocumentsContract.buildDocumentUriUsingTree(tree_uri, file_id)
 			var file_path: String = file_uri.toString()
-			output[parent_path + display_name] = file_path
+			output[path] = file_path
 	cursor.close()
+
+func _mkdir(
+	tree_uri: JavaObject,
+	parent_id: String,
+	parent_path: String,
+	dir_name: String,
+) -> void:
+	var parent_uri: JavaObject = DocumentsContract.buildDocumentUriUsingTree(
+		tree_uri, parent_id)
+	var dir_uri: JavaObject = DocumentsContract.createDocument(
+		resolver, parent_uri, MIME_TYPE_DIR, dir_name)
+	if dir_uri == null:
+		return
+	dir_id[parent_path + dir_name] = DocumentsContract.getDocumentId(dir_uri)
 
 func _load_uri() -> bool:
 	var uri := FileAccess.get_file_as_string("user://uri")

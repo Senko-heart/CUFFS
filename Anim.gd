@@ -179,8 +179,8 @@ func destroy(target: Node) -> void:
 func _move(pos: Vector2, accel: Vector2 = Vector2(3.0, 0.0)) -> Dictionary:
 	return { position = { target = pos, accel = accel }}
 
-func schedule_move(target: Node, pos: Vector2) -> void:
-	schedule(target, _move(pos))
+func schedule_move(target: Node, pos: Vector2, accel: Vector2 = Vector2(3.0, 0.0)) -> void:
+	schedule(target, _move(pos, accel))
 
 func move(target: Node, pos: Vector2, time: float) -> void:
 	await run_single(target, _move(pos), time)

@@ -80,6 +80,7 @@ func _open_archives() -> void:
 		var dir := DirAccess.open(root.trim_suffix("#"))
 		dir.make_dir("save")
 	
+	cfg = ConfigFile.new()
 	Start.dump_into(cfg)
 	var start_cfg := open_write(root + "start.cfg")
 	if start_cfg != null:

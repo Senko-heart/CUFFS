@@ -266,15 +266,41 @@ func _lookup_file(
 	arcs: Array[ZR],
 	basename: String,
 	extensions: PackedStringArray,
-	case_sensitive: bool = true
+	case_sensitive: bool = true,
+	from_arc: int = 0
 ) -> Vector2i:
-	for x in range(arcs.size()):
+	var link_path := basename + ".link"
+	for x in range(from_arc, arcs.size()):
 		var arc := arcs[x]
 		for y in range(extensions.size()):
 			var path := basename + extensions[y]
 			if arc.file_exists(path, case_sensitive):
 				return Vector2i(x, y)
+		if arc.file_exists(link_path, case_sensitive):
+			return Vector2i(x, Vector2i.MAX.y)
 	return Vector2i.MAX
+
+func _resolve_link(
+	pos: Vector2i,
+	arcs: Array[ZR],
+	basename: String,
+	extensions: PackedStringArray,
+	case_sensitive: bool = true
+) -> Dictionary:
+	while pos.y >= extensions.size():
+		if pos == Vector2i.MAX:
+			return {}
+		var link_file := arcs[pos.x].read_file(basename + ".link")
+		basename = link_file.get_string_from_utf8()
+		pos = _lookup_file(arcs, basename, extensions, case_sensitive, pos.x + 1)
+	if pos == Vector2i.MAX:
+		return {}
+	return { arc = arcs[pos.x], basename = basename, extension = extensions[pos.y], pos = pos }
+
+func _read_file(resolved: Dictionary, case_sensitive: bool = true) -> PackedByteArray:
+	if resolved.is_empty():
+		return []
+	return resolved.arc.read_file(resolved.basename + resolved.extension, case_sensitive)
 
 func load_voice(
 	filename: String,
@@ -433,12 +459,12 @@ func put_texture_on_load(
 		if decensor_pos.x <= pos.x:
 			pos = decensor_pos
 			filename = decensor_name
-	if pos == Vector2i.MAX:
-		return
-	var bytes := arcs[pos.x].read_file(filename + exts[pos.y], case_sensitive)
-	var is_hires := pos.x == 0
+	var resolved := _resolve_link(pos, arcs, filename, exts, case_sensitive)
+	var bytes := _read_file(resolved, case_sensitive)
 	if bytes.is_empty():
 		return
+	var is_hires := pos.x == 0
+	pos = resolved.pos
 	if pos.y == 0:
 		rc.load_png(key, bytes, is_hires)
 	elif pos.y == 1:

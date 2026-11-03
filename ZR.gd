@@ -41,12 +41,26 @@ func file_exists(path: String, case_sensitive: bool = true) -> bool:
 		return path == case_sensitive_name[file_id]
 	return true
 
+func get_file_id(path: String, case_sensitive: bool = true) -> int:
+	if not file:
+		return -1
+	var file_id: int = entry_table.get(path.to_upper(), -1)
+	if file_id == -1:
+		return -1
+	if case_sensitive and path != case_sensitive_name[file_id]:
+		return -1
+	return file_id
+
 func read_file(path: String, case_sensitive: bool = true) -> PackedByteArray:
 	if not file: return PackedByteArray()
 	var file_id: int = entry_table.get(path.to_upper(), -1)
 	if file_id == -1: return PackedByteArray()
 	if case_sensitive and path != case_sensitive_name[file_id]:
 		return PackedByteArray()
+	return read_file_by_id(file_id)
+
+func read_file_by_id(file_id: int) -> PackedByteArray:
+	if file_id == -1: return PackedByteArray()
 	file.seek(seek_position[file_id])
 	var raw := file.get_buffer(compressed_size[file_id])
 	match compression[file_id]:
